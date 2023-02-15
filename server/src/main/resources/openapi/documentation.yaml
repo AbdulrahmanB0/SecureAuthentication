@@ -1,0 +1,201 @@
+openapi: "3.0.3"
+info:
+  title: "Secure_Authentication_server API"
+  description: "Secure_Authentication_server API"
+  version: "1.0.0"
+servers:
+- url: "https://Secure_Authentication_server"
+paths:
+  /:
+    get:
+      description: ""
+      responses:
+        "200":
+          description: "OK"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "Welcome to Secure Authentication Ktor Server!"
+  /sign_in_with_google:
+    post:
+      description: ""
+      parameters:
+      - name: "parent"
+        in: "query"
+        required: false
+        schema:
+          type: "object"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+        "500":
+          description: "Internal Server Error"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+        "401":
+          description: "Unauthorized"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /user:
+    delete:
+      description: ""
+      parameters:
+      - name: "parent"
+        in: "query"
+        required: false
+        schema:
+          type: "object"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+    get:
+      description: ""
+      parameters:
+      - name: "parent"
+        in: "query"
+        required: false
+        schema:
+          type: "object"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+    patch:
+      description: ""
+      parameters:
+      - name: "parent"
+        in: "query"
+        required: false
+        schema:
+          type: "object"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /user/sign_in:
+    post:
+      description: ""
+      parameters:
+      - name: "parent"
+        in: "query"
+        required: false
+        schema:
+          type: "object"
+      - name: "parent"
+        in: "query"
+        required: false
+        schema:
+          type: "object"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+        "401":
+          description: "Unauthorized"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /user/sign_out:
+    get:
+      description: ""
+      parameters:
+      - name: "parent"
+        in: "query"
+        required: false
+        schema:
+          type: "object"
+      - name: "parent"
+        in: "query"
+        required: false
+        schema:
+          type: "object"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+  /user/sign_up:
+    post:
+      description: ""
+      parameters:
+      - name: "parent"
+        in: "query"
+        required: false
+        schema:
+          type: "object"
+      - name: "parent"
+        in: "query"
+        required: false
+        schema:
+          type: "object"
+      responses:
+        "201":
+          description: "Created"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+        "400":
+          description: "Bad Request"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+components:
+  schemas:
+    ApiResponse:
+      type: "object"
+      properties:
+        success:
+          type: "boolean"
+        message:
+          type: "string"
+        errors:
+          type: "array"
+          items:
+            type: "string"

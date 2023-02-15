@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Secure Authentication</string>
+    <string name="signin_title">Sign in to Continue</string>
+    <string name="signin_subtitle">If you want to access this app,\nfirst you need to sign in.</string>
+    <string name="successful_authentication">Authenticated Successfully</string>
+    <string name="account_not_found">Google account not found</string>
+    <string name="profile">Profile</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="please_wait">Please wait...</string>
+    <string name="caller_blocked">You are temporarily blocked due to many canceled prompts</string>
+    <string name="email">Email</string>
+</resources>
