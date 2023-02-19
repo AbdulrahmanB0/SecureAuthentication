@@ -1,8 +1,9 @@
-val composeVersion: String by project
-val hiltVersion: String by project
-val ktorVersion: String by project
-val coilVersion: String by project
-val coroutinesVersion: String by project
+@file:Suppress("UnstableApiUsage")
+val composeVersion:             String by project
+val hiltVersion:                String by project
+val ktorVersion:                String by project
+val coilVersion:                String by project
+val coroutinesVersion:          String by project
 val composeDestinationsVersion: String by project
 
 plugins {

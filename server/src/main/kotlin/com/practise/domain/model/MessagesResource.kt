@@ -11,7 +11,7 @@ enum class MessagesResource(val message: String) {
     UNAUTHORIZED("Not Authorized"),
     SIGNED_OUT("User has been signed out successfully"),
     TOKEN_FORMAT_ERROR("Token ID should not be blank or empty!"),
-    TOKEN_VERIFICATION_FAILED("Failed to very Token ID"),
+    TOKEN_VERIFICATION_FAILED("Failed to verify Token ID"),
     UPDATE_FIRST_NAME_ERROR("First name should not be blank or empty!"),
     UPDATE_LAST_NAME_ERROR("Last name should not be blank or empty!"),
     USER_SIGN_IN_SUCCESS("User is successfully signed in"),

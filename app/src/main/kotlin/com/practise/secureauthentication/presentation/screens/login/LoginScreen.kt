@@ -35,7 +35,7 @@ import kotlinx.coroutines.flow.conflate
 private const val TAG = "LoginScreen"
 @OptIn(ExperimentalMaterial3Api::class)
 @RootNavGraph(true)
-@Destination()
+@Destination
 @Composable
 fun LoginScreen (
     viewModel: LoginViewModel = hiltViewModel(),

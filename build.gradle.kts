@@ -5,6 +5,9 @@ buildscript {
         classpath("com.google.dagger:hilt-android-gradle-plugin:$hiltVersion")
         classpath("org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion")
     }
+    repositories {
+        mavenCentral()
+    }
 
 }
 plugins {

@@ -3,6 +3,7 @@ package com.practise.domain.model.user
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.jetbrains.exposed.sql.Table
 import org.litote.kmongo.Id
 import org.litote.kmongo.newId
 import java.time.Instant
@@ -17,7 +18,7 @@ sealed class User {
 
 
 
-    object Table: org.jetbrains.exposed.sql.Table() {
+    object Entity: Table() {
         val id = varchar("id", 24)
         val name = varchar("name", 50)
         val emailAddress = varchar("emailAddress", 255)
@@ -26,5 +27,6 @@ sealed class User {
         val type = varchar("type", 50)
 
         override val primaryKey = PrimaryKey(id)
+        override val tableName = "user"
     }
 }

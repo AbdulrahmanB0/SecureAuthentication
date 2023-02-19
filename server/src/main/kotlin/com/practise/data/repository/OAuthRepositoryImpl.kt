@@ -11,7 +11,7 @@ class OAuthRepositoryImpl: OAuthRepository {
 
     override suspend fun verifyGoogleTokenId(token: String): GoogleIdToken? {
         val verifier = GoogleIdTokenVerifier.Builder(NetHttpTransport(), GsonFactory())
-            .setAudience(listOf(System.getenv("audience")))
+            .setAudience(listOf(System.getenv("google_oauth_client")))
             .setIssuer(Constants.GOOGLE_ISSUER)
             .build()
         return verifier.runCatching {

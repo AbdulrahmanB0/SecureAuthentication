@@ -19,15 +19,15 @@ class MySqlUserDataSource(
     init {
         transaction {
             SchemaUtils.createMissingTablesAndColumns(
-                User.Table,
-                RegularUser.Table,
-                GoogleUser.Table
+                User.Entity,
+                RegularUser.Entity,
+                GoogleUser.Entity
             )
         }
     }
     override suspend fun addUser(user: User): Boolean {
         return suspendedTransactionAsync(Dispatchers.IO, db) {
-            var wasAcknowledged = User.Table.insert {
+            var wasAcknowledged = User.Entity.insert {
                 it[id] = user.id.toString()
                 it[name] = user.name
                 it[emailAddress] = user.emailAddress.value
@@ -51,19 +51,19 @@ class MySqlUserDataSource(
 
     override suspend fun getUserByUsername(username: String): User? {
         return suspendedTransactionAsync(Dispatchers.IO, db) {
-            (RegularUser.Table innerJoin User.Table)
-                        .select { RegularUser.Table.username eq username }.limit(1)
+            (RegularUser.Entity innerJoin User.Entity)
+                        .select { RegularUser.Entity.username eq username }.limit(1)
                         .singleOrNull()
-                        ?.let(RegularUser.Table::toModel)
+                        ?.let(RegularUser.Entity::toModel)
         }.await()
     }
 
     override suspend fun getUserById(userId: Id<User>): User? {
         return suspendedTransactionAsync(Dispatchers.IO, db) {
-            User.Table.select { User.Table.id eq userId.toString() }.singleOrNull()?.let {
-                when(it[User.Table.type]) {
-                    RegularUser::class.simpleName -> RegularUser.Table.toModel(it)
-                    GoogleUser::class.simpleName -> GoogleUser.Table.toModel(it)
+            User.Entity.select { User.Entity.id eq userId.toString() }.singleOrNull()?.let {
+                when(it[User.Entity.type]) {
+                    RegularUser::class.simpleName -> RegularUser.Entity.toModel(it)
+                    GoogleUser::class.simpleName -> GoogleUser.Entity.toModel(it)
                     else -> null
                 }
             }
@@ -72,10 +72,10 @@ class MySqlUserDataSource(
 
     override suspend fun getUserBySubject(subject: String): User? {
         return suspendedTransactionAsync(Dispatchers.IO, db) {
-            (GoogleUser.Table innerJoin User.Table)
-                        .select { GoogleUser.Table.subjectId eq subject }.limit(1)
+            (GoogleUser.Entity innerJoin User.Entity)
+                        .select { GoogleUser.Entity.subjectId eq subject }.limit(1)
                         .singleOrNull()
-                        ?.let(GoogleUser.Table::toModel)
+                        ?.let(GoogleUser.Entity::toModel)
         }.await()
     }
 
@@ -87,14 +87,14 @@ class MySqlUserDataSource(
 
     override suspend fun deleteUser(userId: Id<User>): Boolean {
         return suspendedTransactionAsync(Dispatchers.IO, db) {
-            User.Table.deleteWhere { id eq userId.toString() } == 1
+            User.Entity.deleteWhere { id eq userId.toString() } == 1
         }.await()
     }
 
     override suspend fun updateUserInfo(userId: Id<User>, userUpdate: UserUpdate): Boolean {
         return suspendedTransactionAsync(Dispatchers.IO, db) {
-            User.Table.update(
-                where = { User.Table.id eq userId.toString() },
+            User.Entity.update(
+                where = { User.Entity.id eq userId.toString() },
                 limit = 1
             ) {
                 it[name] = "${userUpdate.firstName} ${userUpdate.lastName}"
@@ -102,12 +102,12 @@ class MySqlUserDataSource(
         }.await()
     }
 
-    private fun insertGoogleUser(user: GoogleUser) = GoogleUser.Table.insert {
+    private fun insertGoogleUser(user: GoogleUser) = GoogleUser.Entity.insert {
         it[id] = user.id.toString()
         it[subjectId] = user.subjectId
     }.insertedCount == 1
 
-    private fun insertRegularUser(user: RegularUser) = RegularUser.Table.insert {
+    private fun insertRegularUser(user: RegularUser) = RegularUser.Entity.insert {
         it[id] = user.id.toString()
         it[username] = user.username
         it[password] = user.password

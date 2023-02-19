@@ -2,7 +2,9 @@ package com.practise.routes
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken
 import com.practise.data.repository.MongoUserDataSource
-import com.practise.domain.model.*
+import com.practise.domain.model.MessagesResource
+import com.practise.domain.model.TokenId
+import com.practise.domain.model.UserSession
 import com.practise.domain.model.api.ApiResponse
 import com.practise.domain.model.api.EndPoint
 import com.practise.domain.model.security.hashing.HashingService
@@ -31,13 +33,13 @@ fun Route.authRoutes() {
     loginUserRoute(dataSource, hashingService)
     signInWithGoogleRoute(dataSource, oAuthRepository::verifyGoogleTokenId)
 
+
 }
 
 private fun Route.signInWithGoogleRoute(
     dataSource: UserDataSource,
     verifyGoogleTokenId: suspend (String) -> GoogleIdToken?
 ) {
-
 
     post<EndPoint.OAuth.Google> {
         val token = call.receive<TokenId>()

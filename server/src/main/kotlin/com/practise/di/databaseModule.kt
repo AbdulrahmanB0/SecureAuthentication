@@ -9,6 +9,7 @@ import redis.clients.jedis.JedisPooled as RedisClient
 
 context(Application)
 val databaseModule get() = module {
+    environment
     single {
         Database.connect(
             url = environment.config.property("database.exposed.url").getString(),

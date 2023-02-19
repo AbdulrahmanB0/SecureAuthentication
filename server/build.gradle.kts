@@ -58,6 +58,7 @@ dependencies {
     implementation("io.ktor:ktor-server-http-redirect-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-freemarker-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-cors-jvm:$ktorVersion")
+    implementation("com.mysql:mysql-connector-j:8.0.32")
     testImplementation("io.ktor:ktor-server-tests-jvm:$ktorVersion")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
 

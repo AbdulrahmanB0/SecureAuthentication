@@ -17,7 +17,7 @@ class KtorApiRepositoryImpl @Inject constructor(
 ): KtorApiRepository {
     override suspend fun verifyToken(tokenId: TokenId): ApiResponse<Unit> {
         return client.post(EndPoint.OAuth.Google()) {
-            setBody(tokenId.value)
+            setBody(tokenId)
         }.body()
     }
 

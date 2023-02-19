@@ -41,7 +41,7 @@ object NetworkModule {
             }
             install(Logging) {
                 logger = Logger.ANDROID
-                level = LogLevel.ALL
+                level = LogLevel.BODY
             }
             defaultRequest {
                 url("http://secureauth.abdulrahman.codes")

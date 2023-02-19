@@ -92,7 +92,6 @@ fun GoogleButton(
             )
     }
 }
-@Preview(showBackground = true)
 @Composable
 fun DividerWithCenteredText(
     modifier: Modifier = Modifier,
@@ -101,7 +100,6 @@ fun DividerWithCenteredText(
     text: String = "OR",
     textStyle: TextStyle = TextStyle.Default
 ) {
-    val color = DividerDefaults.color
     Row(
         modifier = modifier.padding(10.dp),
         horizontalArrangement = Arrangement.Center,

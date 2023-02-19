@@ -10,8 +10,11 @@ val Purple40 = Color(0xFF6650a4)
 val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
+/*
 val Color.Companion.ErrorRed: Color get() = Color(0xFFFF6C60)
 val Color.Companion.InfoGreen: Color get() = Color(0xFF00C096)
+*/
+
 val Color.Companion.LoadingBlue: Color get() = Color(0xFF4285F4)
 
 /*
