@@ -14,6 +14,7 @@ import com.practise.secureauthentication.domain.repository.KtorApiRepository
 import com.practise.secureauthentication.domain.repository.OAuthRepository
 import com.practise.secureauthentication.domain.repository.SignInRepository
 import com.practise.secureauthentication.util.OneTapSignInResource
+import com.practise.secureauthentication.util.TokenVerificationResource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -32,7 +33,7 @@ class LoginViewModel @Inject constructor(
     private val authRepository: OAuthRepository
 ): ViewModel() {
 
-    var uiState by mutableStateOf(LoginUiState())
+    var uiState by mutableStateOf(UiState())
         private set
 
     val messageFlow = MutableSharedFlow<String>()
@@ -112,5 +113,14 @@ class LoginViewModel @Inject constructor(
             errorCode == 10 || errorCode == 16
         }
     }
+
+    data class UiState(
+        val email: String = "",
+        val password: String = "",
+        val signedIn: Boolean = false,
+        val error: Boolean = false,
+        val oneTapSignInResource: OneTapSignInResource = Resource.Idle,
+        val tokenVerificationResource: TokenVerificationResource = Resource.Idle
+    )
 }
 

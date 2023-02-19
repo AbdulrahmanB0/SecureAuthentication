@@ -2,7 +2,6 @@ package com.practise.secureauthentication.data.api
 
 import io.ktor.client.plugins.cookies.*
 import io.ktor.http.*
-import java.time.Instant
 import javax.inject.Inject
 
 @Suppress("UNUSED")
