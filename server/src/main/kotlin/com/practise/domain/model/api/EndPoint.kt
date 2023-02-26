@@ -15,15 +15,15 @@ class EndPoint {
     }
 
     @Serializable @Resource("user")
-    class UserManipulation(val parent: EndPoint = EndPoint()) {
+    class User(val parent: EndPoint = EndPoint()) {
 
         @Serializable @Resource("signup")
-        class SignUp(val parent: UserManipulation = UserManipulation())
+        class SignUp(val parent: User = User())
 
         @Serializable @Resource("signin")
-        class SignIn(val parent: UserManipulation = UserManipulation())
+        class SignIn(val parent: User = User())
         @Serializable @Resource("signout")
-        class SignOut(val parent: UserManipulation = UserManipulation())
+        class SignOut(val parent: User = User())
     }
 
     @Serializable @Resource("swagger")

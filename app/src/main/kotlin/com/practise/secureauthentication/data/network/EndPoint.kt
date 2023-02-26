@@ -1,4 +1,4 @@
-package com.practise.secureauthentication.data.api
+package com.practise.secureauthentication.data.network
 
 import io.ktor.resources.*
 import kotlinx.serialization.Serializable

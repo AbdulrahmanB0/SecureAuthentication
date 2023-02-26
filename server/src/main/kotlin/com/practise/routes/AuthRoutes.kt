@@ -3,15 +3,15 @@ package com.practise.routes
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken
 import com.practise.data.repository.MongoUserDataSource
 import com.practise.domain.model.MessagesResource
-import com.practise.domain.model.TokenId
 import com.practise.domain.model.UserSession
-import com.practise.domain.model.api.ApiResponse
 import com.practise.domain.model.api.EndPoint
 import com.practise.domain.model.security.hashing.HashingService
 import com.practise.domain.model.security.hashing.SaltedHash
 import com.practise.domain.model.user.*
 import com.practise.domain.repository.OAuthRepository
 import com.practise.domain.repository.UserDataSource
+import domain.model.ApiResponse
+import domain.model.TokenId
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -72,7 +72,7 @@ private fun Route.registerUserRoute(
     hashingService: HashingService,
 
     ) {
-    post<EndPoint.UserManipulation.SignUp> {
+    post<EndPoint.User.SignUp> {
         val user = call.receive<RegularUser>().let {
             val saltedHash = hashingService.generateSaltedHash(it.password)
             it.copy(password = saltedHash.hash, salt = saltedHash.salt)
@@ -101,7 +101,7 @@ private fun Route.registerUserRoute(
 }
 
 private fun Route.loginUserRoute(userDataSource: UserDataSource, hashingService: HashingService) {
-    post<EndPoint.UserManipulation.SignIn> {
+    post<EndPoint.User.SignIn> {
         val credentials = call.receive<UserCredentials>()
         val user = userDataSource.getUserByUsername(credentials.username) as? RegularUser?
 

@@ -7,4 +7,4 @@ pluginManagement {
 }
 
 rootProject.name = "SecureAuthentication"
-include(":app", ":server")
+include(":app", ":server", ":common")

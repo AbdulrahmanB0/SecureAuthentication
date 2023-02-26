@@ -1,12 +1,12 @@
 package com.practise.routes
 
-import com.practise.domain.model.*
-import com.practise.domain.repository.UserDataSource
 import com.practise.core.Constants
-import com.practise.domain.model.api.ApiResponse
+import com.practise.domain.model.MessagesResource
+import com.practise.domain.model.UserSession
 import com.practise.domain.model.api.EndPoint
 import com.practise.domain.model.user.UserUpdate
-import com.practise.data.repository.MongoUserDataSource as Mongo
+import com.practise.domain.repository.UserDataSource
+import domain.model.ApiResponse
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -20,6 +20,7 @@ import org.bson.types.ObjectId
 import org.koin.core.qualifier.TypeQualifier
 import org.koin.ktor.ext.inject
 import org.litote.kmongo.id.toId
+import com.practise.data.repository.MongoUserDataSource as Mongo
 
 /** This function aggregates all the defined user routes with proper authentication */
 fun Route.userRoutes() {
@@ -38,7 +39,7 @@ fun Route.userRoutes() {
  * This function returns the user info from the database when requested
  */
 private fun Route.getUserInfoRoute(dataSource: UserDataSource) {
-    get<EndPoint.UserManipulation> {
+    get<EndPoint.User> {
         val userSession = call.principal<UserSession>()!!
         val user = dataSource.getUserById(ObjectId(userSession.id).toId())
         if (user != null) {
@@ -60,7 +61,7 @@ private fun Route.getUserInfoRoute(dataSource: UserDataSource) {
  * This function is used to update the user info in the database when requested
  */
 private fun Route.updateUserInfoRoute(dataSource: UserDataSource) {
-    patch<EndPoint.UserManipulation> {
+    patch<EndPoint.User> {
         val userSession = call.principal<UserSession>()!!
 
         val userUpdate = call.receive<UserUpdate>()
@@ -86,7 +87,7 @@ private fun Route.updateUserInfoRoute(dataSource: UserDataSource) {
  */
 private fun Route.deleteUserRoute(dataSource: UserDataSource) {
 
-    delete<EndPoint.UserManipulation> {
+    delete<EndPoint.User> {
         val userSession = call.principal<UserSession>()!!
         val isSuccess = dataSource.deleteUser(ObjectId(userSession.id).toId())
 
@@ -108,7 +109,7 @@ private fun Route.deleteUserRoute(dataSource: UserDataSource) {
  * This route is used sign out the user by clearing his session when requested
  */
 private fun Route.signOutUserRoute() {
-    get<EndPoint.UserManipulation.SignOut> {
+    get<EndPoint.User.SignOut> {
         call.sessions.clear<UserSession>()
         call.respond(ApiResponse<Unit>(message = MessagesResource.SIGNED_OUT.message))
     }

@@ -5,6 +5,8 @@ val ktorVersion:                String by project
 val coilVersion:                String by project
 val coroutinesVersion:          String by project
 val composeDestinationsVersion: String by project
+val kotlinVersion:              String by project
+val logbackVersion:             String by project
 
 plugins {
     kotlin("android")
@@ -13,7 +15,7 @@ plugins {
 
     id("com.android.application")
     id("dagger.hilt.android.plugin")
-    id("com.google.devtools.ksp") version "1.8.0-1.0.9" // Depends on your kotlin version
+    id("com.google.devtools.ksp") version "1.8.10-1.0.9" // Depends on your kotlin version
 }
 
 android {
@@ -50,7 +52,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.0"
+        kotlinCompilerExtensionVersion = "1.4.2"
     }
     packagingOptions {
         resources {
@@ -75,12 +77,15 @@ repositories {
 
 dependencies {
 
+//    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
+
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.0-beta01")
     implementation("androidx.activity:activity-compose:1.6.1")
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.compose.ui:ui-tooling-preview:$composeVersion")
     implementation("androidx.compose.material3:material3:1.1.0-alpha06")
+    implementation(project(mapOf("path" to ":common")))
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -99,6 +104,7 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 
 
+
     //Ktor
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
@@ -106,6 +112,8 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
     implementation("io.ktor:ktor-client-logging:$ktorVersion")
+
+    implementation("org.slf4j:slf4j-simple:2.0.6")
 
     //Coil
     implementation("io.coil-kt:coil:$coilVersion")

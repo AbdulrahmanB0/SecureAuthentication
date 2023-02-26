@@ -10,4 +10,5 @@
     <string name="please_wait">Please wait...</string>
     <string name="caller_blocked">You are temporarily blocked due to many canceled prompts</string>
     <string name="email">Email</string>
+    <string name="auth_success">You have been authenticated successfully!</string>
 </resources>

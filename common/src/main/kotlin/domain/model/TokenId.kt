@@ -1,7 +1,7 @@
-package com.practise.secureauthentication.domain.model
+package domain.model
 
 import kotlinx.serialization.Serializable
 
-@Serializable
 @JvmInline
+@Serializable
 value class TokenId(val value: String)

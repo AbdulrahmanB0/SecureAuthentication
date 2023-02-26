@@ -10,9 +10,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
-import com.practise.secureauthentication.presentation.screens.NavGraphs
+import com.practise.secureauthentication.presentation.navigation.NavigationSystem
 import com.practise.secureauthentication.ui.theme.SecureAuthenticationTheme
-import com.ramcosta.composedestinations.DestinationsNavHost
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -27,7 +26,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colorScheme.background
                     ) {
-                        DestinationsNavHost(navGraph = NavGraphs.root)
+                        NavigationSystem()
                     }
                 }
 

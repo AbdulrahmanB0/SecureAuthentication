@@ -9,12 +9,11 @@ fun main(args: Array<String>): Unit = io.ktor.server.cio.EngineMain.main(args)
 fun Application.module() {
 
         configureKoin() //Should be first
-        configureCORS()
         configureAuthentication() //Should come before 'configureRouting()' always
+        configureRouting()
         configureSessions()
         configureRequestValidation()
         configureStatusPages()
-        configureRouting()
         configureSerialization()
         configureMonitoring()
 

@@ -1,7 +1,7 @@
 package com.practise.plugins
 
-import com.practise.domain.model.api.ApiResponse
 import com.practise.domain.model.MessagesResource
+import domain.model.ApiResponse
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.requestvalidation.*

@@ -1,11 +1,11 @@
 package com.practise.secureauthentication.data.repository
 
-import com.practise.secureauthentication.data.api.EndPoint
-import com.practise.secureauthentication.domain.model.ApiResponse
-import com.practise.secureauthentication.domain.model.TokenId
+import com.practise.secureauthentication.data.network.EndPoint
 import com.practise.secureauthentication.domain.model.User
 import com.practise.secureauthentication.domain.model.UserUpdate
 import com.practise.secureauthentication.domain.repository.KtorApiRepository
+import domain.model.ApiResponse
+import domain.model.TokenId
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.resources.*
