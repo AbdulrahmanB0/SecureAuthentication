@@ -1,20 +1,15 @@
 package com.practise.secureauthentication.presentation.screens.login
 
-import android.util.Log
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.IntentSenderRequest
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -22,54 +17,91 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.practise.secureauthentication.R
-import com.practise.secureauthentication.domain.model.Resource
 import com.practise.secureauthentication.presentation.screens.SimpleTopAppBar
 import com.practise.secureauthentication.presentation.screens.destinations.LoginScreenDestination
 import com.practise.secureauthentication.presentation.screens.destinations.ProfileScreenDestination
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
-private const val TAG = "LoginScreen"
-@OptIn(ExperimentalMaterial3Api::class)
-@RootNavGraph(true)
 @Destination
+@RootNavGraph(start = true)
 @Composable
 fun LoginScreen (
     viewModel: LoginViewModel = hiltViewModel(),
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
 ) {
     val uiState = viewModel.uiState
-    val colorScheme = MaterialTheme.colorScheme
-    val context = LocalContext.current
-    val snackBarHostState = remember { SnackbarHostState() }
-    val isLoading by remember(uiState.tokenVerificationResource, uiState.oneTapSignInResource) {
-        derivedStateOf {
-            uiState.oneTapSignInResource is Resource.Loading ||
-                    uiState.oneTapSignInResource is Resource.Success ||
-                    uiState.tokenVerificationResource is Resource.Loading
-        }
-    }
-
-    LaunchedEffect(key1 = Unit) {
-        viewModel.messageFlow.conflate().collectLatest {
-            Log.d(TAG, "MessageState: $it")
-            snackBarHostState.showSnackbar(it)
-        }
-    }
-
-    Scaffold(
-        topBar = { SimpleTopAppBar(title = "Secure Authentication") },
-        snackbarHost = { SnackbarHost(hostState = snackBarHostState) { data ->
-            Snackbar(
-                snackbarData = data,
-                containerColor = if(uiState.error) colorScheme.errorContainer else colorScheme.primaryContainer,
-                contentColor = if(uiState.error) colorScheme.onErrorContainer else colorScheme.onPrimaryContainer,
+    val errorsSnackBarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val somethingWrongMsg = stringResource(id = R.string.something_wrong)
+    val activityLauncher = googleSignInLauncher(
+        onTokenReceived = {
+            viewModel.verifyTokenOnBackend(
+                tokenId = it,
+                onSuccess = {
+                    viewModel.resetStates()
+                    viewModel.saveSignedInState(true)
+                    navigator.navigate(ProfileScreenDestination) {
+                        popUpTo(LoginScreenDestination.route) { inclusive = true }
+                    }
+                },
+                onFailure = {
+                    viewModel.resetStates()
+                    scope.launch {
+                        errorsSnackBarHostState.showSnackbar(somethingWrongMsg)
+                    }
+                }
             )
-        } }
+        },
+        onDialogDismissed = viewModel::resetStates,
+        oneTapClient = viewModel.oneTapClient
+    )
+
+    LaunchedEffect(uiState.signedIn) {
+        navigator.navigate(ProfileScreenDestination) {
+            popUpTo(LoginScreenDestination.route) { inclusive = true }
+        }
+    }
+
+    AnimatedVisibility(visible = !uiState.signedIn) {
+        ScreenContent(
+            viewModel = viewModel,
+            coroutineScope = scope,
+            snackbarHostState = errorsSnackBarHostState,
+            launcher = activityLauncher
+        )
+    }
+
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun ScreenContent(
+    viewModel: LoginViewModel,
+    coroutineScope: CoroutineScope,
+    snackbarHostState: SnackbarHostState,
+    launcher: ActivityResultLauncher<IntentSenderRequest>,
+) {
+    val uiState = viewModel.uiState
+    val callerBlockMsg = stringResource(R.string.caller_blocked)
+    val noCredentialsMsg = stringResource(R.string.account_not_found)
+    val noInternetMsg = stringResource(R.string.no_internet)
+    Scaffold(
+        topBar = { SimpleTopAppBar(title = stringResource(R.string.app_name)) },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState) {
+                Snackbar(
+                    snackbarData = it,
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                )
+            }
+        }
     ) { paddingValues ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -100,43 +132,30 @@ fun LoginScreen (
             GoogleButton(
                 primaryText = stringResource(R.string.sign_in_with_google),
                 secondaryText = stringResource(R.string.please_wait),
-                loadingState = isLoading,
-                onClick = viewModel::signInWithGoogle
+                loadingState = uiState.loading,
+                onClick = {
+                    if(uiState.connected)
+                        viewModel.signInWithGoogle(
+                            launcher = launcher,
+                            onCallerBlocked = {
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar(callerBlockMsg)
+                                }
+                            },
+                            onNoCredentials = {
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar(noCredentialsMsg)
+                                }
+                            }
+                        )
+                    else
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar(noInternetMsg)
+                        }
+                }
             )
-            
-            DividerWithCenteredText(text = "OR", color = Color.LightGray)
-
-            OutlinedTextField(
-                modifier = Modifier.onFocusChanged { viewModel.isEmail(uiState.email) },
-                value = uiState.email,
-                onValueChange = viewModel::setEmailValue,
-                label = { Text(text = stringResource(R.string.email)) },
-            )
-
-
         }
 
-        StartActivityForSignInWithGoogleResult(
-            oneTapClient = viewModel.oneTapClient,
-            oneTapSignInResource = uiState.oneTapSignInResource,
-            onTokenReceived = viewModel::verifyTokenOnBackend,
-            onDialogDismissed = viewModel::resetOneTapState,
-            detectBlockedCaller = viewModel::detectBlockedCaller,
-            onNoCredentialsFound = { viewModel.onErrorOccurred(context.getString(R.string.account_not_found)) },
-            onCallerBlocked = { viewModel.onErrorOccurred(context.getString(R.string.caller_blocked)) }
-        )
-
-        TokenVerificationStateHandler(
-            tokenVerificationResource= uiState.tokenVerificationResource,
-            onSuccess = {
-                viewModel.setErrorState(false)
-                viewModel.saveSignedInState(true)
-                navigator.navigate(ProfileScreenDestination) {
-                    popUpTo(LoginScreenDestination.route) { inclusive = true }
-                }
-            },
-            onFailure = { viewModel.onErrorOccurred("Connection to Ktor Backend failed!") }
-        )
     }
 
 }

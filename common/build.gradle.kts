@@ -10,7 +10,6 @@ repositories {
     mavenCentral()
 }
 
-val kotlinVersion: String by project
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0-RC")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.1")

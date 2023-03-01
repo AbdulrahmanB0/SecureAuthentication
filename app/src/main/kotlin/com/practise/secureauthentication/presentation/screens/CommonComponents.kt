@@ -18,8 +18,7 @@ fun SimpleTopAppBar(title: String) {
 }
 
 
-
-
+@Suppress("unused")
 fun startActivityForSharingText(
     tokenId: TokenId,
     context: Context

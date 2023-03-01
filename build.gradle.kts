@@ -12,6 +12,7 @@ buildscript {
     }
 
 }
+
 plugins {
     kotlin("jvm")   version "1.8.10"
     id("io.ktor.plugin") version "2.2.3"
@@ -29,6 +30,8 @@ repositories {
     google()
     gradlePluginPortal()
 }
+
+tasks.getByName("shadowJar").enabled = false
 
 tasks.test {
     useJUnitPlatform()

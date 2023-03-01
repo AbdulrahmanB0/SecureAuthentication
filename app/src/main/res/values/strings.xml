@@ -11,4 +11,6 @@
     <string name="caller_blocked">You are temporarily blocked due to many canceled prompts</string>
     <string name="email">Email</string>
     <string name="auth_success">You have been authenticated successfully!</string>
+    <string name="no_internet">Connection failed. Check your internet connection.</string>
+    <string name="something_wrong">Something went wrong, try again later.</string>
 </resources>

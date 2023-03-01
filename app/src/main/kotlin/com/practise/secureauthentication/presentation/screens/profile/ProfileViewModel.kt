@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.practise.secureauthentication.domain.model.Resource
+import com.practise.secureauthentication.data.Resource
 import com.practise.secureauthentication.domain.model.User
 import com.practise.secureauthentication.domain.model.UserUpdate
 import com.practise.secureauthentication.domain.repository.KtorApiRepository

@@ -3,29 +3,17 @@ package com.practise.secureauthentication.presentation.screens.login
 import android.app.Activity
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
-import androidx.compose.material3.DividerDefaults
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,17 +22,12 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.auth.api.identity.SignInClient
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.common.api.CommonStatusCodes
 import com.practise.secureauthentication.R
-import com.practise.secureauthentication.domain.model.Resource
-import com.practise.secureauthentication.domain.model.TokenId
 import com.practise.secureauthentication.ui.theme.LoadingBlue
-import com.practise.secureauthentication.util.OneTapSignInResource
+import domain.model.TokenId
 
 @Composable
 fun GoogleButton(
@@ -97,7 +80,7 @@ fun DividerWithCenteredText(
     modifier: Modifier = Modifier,
     dividerThickness: Dp = DividerDefaults.Thickness,
     color: Color = DividerDefaults.color,
-    text: String = "OR",
+    text: String,
     textStyle: TextStyle = TextStyle.Default
 ) {
     Row(
@@ -111,7 +94,9 @@ fun DividerWithCenteredText(
             color = color
         )
         Text(
-            modifier = Modifier.padding(10.dp).weight(.1f),
+            modifier = Modifier
+                .padding(10.dp)
+                .weight(.1f),
             text = text,
             style = textStyle,
             color = color
@@ -124,88 +109,27 @@ fun DividerWithCenteredText(
     }
 }
 
-
 @Composable
-fun StartActivityForSignInWithGoogleResult(
+fun googleSignInLauncher(
     onTokenReceived: (TokenId) -> Unit,
     onDialogDismissed: () -> Unit,
-    onNoCredentialsFound: () -> Unit,
     oneTapClient: SignInClient,
-    oneTapSignInResource: OneTapSignInResource,
-    detectBlockedCaller: suspend (Throwable) -> Boolean,
-    onCallerBlocked: () -> Unit,
-) {
-    val TAG = "StartActivityForResult"
-    val clipboardManager = LocalClipboardManager.current
+): ActivityResultLauncher<IntentSenderRequest> {
+
+    val tag = "GoogleSignInLauncher"
+    val clipboardManager = LocalClipboardManager.current //TODO: Remove this line after project completion
     val activityLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult()
     ) { activityResult ->
-        try {
-            if(activityResult.resultCode == Activity.RESULT_OK) {
-                val credentials = oneTapClient.getSignInCredentialFromIntent(activityResult.data)
-                val tokenId = credentials.googleIdToken
-                Log.d(TAG, "Token ID: $tokenId")
-                tokenId?.let {
-                    clipboardManager.setText(AnnotatedString(it))
-                    onTokenReceived(TokenId(it))
-                }
-            }
-            else{
-                Log.d(TAG, "BLACK SCRIM CLICKED, DIALOG CLOSED")
-                onDialogDismissed()
-            }
-        } catch (e: ApiException) {
-            when(e.statusCode) {
-                CommonStatusCodes.CANCELED -> Log.d(TAG, "ONE-TAP DIALOG CANCELED")
-                CommonStatusCodes.NETWORK_ERROR -> Log.d(TAG, "ONE-TAP NETWORK ERROR.")
-                else -> Log.d(TAG, "${e.message}")
-            }
+        if (activityResult.resultCode == Activity.RESULT_OK) {
+            val credentials = oneTapClient.getSignInCredentialFromIntent(activityResult.data)
+            val tokenId = credentials.googleIdToken ?: return@rememberLauncherForActivityResult
+            clipboardManager.setText(AnnotatedString(tokenId)) //TODO: Remove this line after project completion
+            onTokenReceived(TokenId(tokenId))
+        } else {
+            Log.i(tag, "Login cancelled")
             onDialogDismissed()
         }
     }
-
-    when(oneTapSignInResource) {
-        is Resource.Success -> oneTapSignInResource.data?.let {
-            LaunchedEffect(key1 = it) {
-                val intent = IntentSenderRequest.Builder(it.pendingIntent.intentSender).build()
-                activityLauncher.launch(intent)
-            }
-        }
-        is Resource.Failure -> {
-            LaunchedEffect(key1 = oneTapSignInResource) {
-                val isBlocked = detectBlockedCaller(oneTapSignInResource.throwable)
-                Log.d(TAG, "StartActivityForSignInResult: ${oneTapSignInResource.throwable.message}")
-                if(isBlocked)
-                    onCallerBlocked()
-                else
-                    onNoCredentialsFound()
-            }
-        }
-        else -> {}
-    }
-
-}
-
-@Composable
-fun TokenVerificationStateHandler(
-    tokenVerificationResource: Resource<Unit>,
-    onSuccess: () -> Unit,
-    onFailure: () -> Unit
-) {
-    val TAG = "TokenVerificationStateHandler"
-    when (tokenVerificationResource) {
-        is Resource.Idle -> {}
-        is Resource.Loading -> Log.d(TAG, "Token Verification in Loading state")
-        is Resource.Success ->
-            LaunchedEffect(key1 = Unit) {
-                Log.d(TAG, "Token Verification Success!")
-                onSuccess()
-            }
-
-        is Resource.Failure ->
-            LaunchedEffect(key1 = Unit) {
-                Log.d(TAG, "Token Verification Failed!")
-                onFailure()
-            }
-    }
+    return activityLauncher
 }

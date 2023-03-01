@@ -1,5 +1,6 @@
-package com.practise.secureauthentication.domain.model
+package com.practise.secureauthentication.data
 
+@Suppress("unused")
 sealed class Resource<out T> {
     object Idle: Resource<Nothing>()
     object Loading: Resource<Nothing>()

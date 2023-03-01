@@ -77,10 +77,8 @@ repositories {
 
 dependencies {
 
-//    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
-
     implementation("androidx.core:core-ktx:1.9.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.0-beta01")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.0-rc01")
     implementation("androidx.activity:activity-compose:1.6.1")
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.compose.ui:ui-tooling-preview:$composeVersion")
@@ -94,7 +92,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest:$composeVersion")
 
     //Compose Destinations
-    implementation("io.github.raamcosta.compose-destinations:core:$composeDestinationsVersion")
+    implementation("io.github.raamcosta.compose-destinations:animations-core:$composeDestinationsVersion")
     ksp("io.github.raamcosta.compose-destinations:ksp:$composeDestinationsVersion")
 
     //dagger hilt

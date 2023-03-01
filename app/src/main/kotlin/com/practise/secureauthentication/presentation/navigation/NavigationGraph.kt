@@ -6,5 +6,6 @@ import com.ramcosta.composedestinations.DestinationsNavHost
 
 @Composable
 fun NavigationSystem() {
-    DestinationsNavHost(navGraph = NavGraphs.root)
+    DestinationsNavHost(navGraph = NavGraphs.root,)
+
 }
