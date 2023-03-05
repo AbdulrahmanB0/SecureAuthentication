@@ -68,7 +68,7 @@ private fun Route.updateUserInfoRoute(dataSource: UserDataSource) {
         if (isSuccess) {
             application.log.info(MessagesResource.USER_INFO_UPDATE_SUCCESS.message)
             call.sessions.set(UserSession(userSession.id))
-            call.respond(status = HttpStatusCode.NoContent, ApiResponse<Unit>(message = MessagesResource.USER_INFO_UPDATE_SUCCESS.message))
+            call.respond(status = HttpStatusCode.OK, ApiResponse<Unit>(message = MessagesResource.USER_INFO_UPDATE_SUCCESS.message))
         } else {
             MessagesResource.USER_INFO_UPDATE_FAILED.message.let { message ->
                 application.log.error(message)
@@ -89,7 +89,7 @@ private fun Route.deleteUserRoute(dataSource: UserDataSource) {
         if (isSuccess) {
             application.log.info(MessagesResource.USER_DELETE_SUCCESS.message)
             call.sessions.clear<UserSession>()
-            call.respond(HttpStatusCode.NoContent, ApiResponse<Unit>(message = MessagesResource.USER_DELETE_SUCCESS.message))
+            call.respond(HttpStatusCode.OK, ApiResponse<Unit>(message = MessagesResource.USER_DELETE_SUCCESS.message))
         } else {
             MessagesResource.USER_DELETE_FAILED.message.let { message ->
                 application.log.error(message)
@@ -105,6 +105,6 @@ private fun Route.deleteUserRoute(dataSource: UserDataSource) {
 private fun Route.signOutUserRoute() {
     get<EndPoint.User.SignOut> {
         call.sessions.clear<UserSession>()
-        call.respond(HttpStatusCode.NoContent, ApiResponse<Unit>(message = MessagesResource.SIGNED_OUT.message))
+        call.respond(HttpStatusCode.OK, ApiResponse<Unit>(message = MessagesResource.SIGNED_OUT.message))
     }
 }
