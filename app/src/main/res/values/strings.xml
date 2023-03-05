@@ -7,7 +7,7 @@
     <string name="profile">Profile</string>
     <string name="delete_account">Delete Account</string>
     <string name="sign_in_with_google">Sign in with Google</string>
-    <string name="please_wait">Please wait...</string>
+    <string name="please_wait">Please wait…</string>
     <string name="caller_blocked">You are temporarily blocked due to many canceled prompts</string>
     <string name="email">Email</string>
     <string name="auth_success">You have been authenticated successfully!</string>
@@ -35,4 +35,6 @@
     <string name="service_unavailable">Service is not available, please try again later</string>
     <string name="session_timedout">Session timed out, please sign in again.</string>
     <string name="sign_in">Sign in</string>
+    <string name="retry">Retry</string>
+    <string name="warning">Warning icon</string>
 </resources>

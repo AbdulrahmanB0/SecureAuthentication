@@ -7,14 +7,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.practise.secureauthentication.R
 import com.practise.secureauthentication.data.RemoteResource
+import com.practise.secureauthentication.data.network.ApiErrors
 import com.practise.secureauthentication.domain.model.User
 import com.practise.secureauthentication.domain.model.UserUpdate
 import com.practise.secureauthentication.domain.usecases.UserUseCases
+import com.practise.secureauthentication.presentation.core.connectivity.ConnectivityObserver
 import com.practise.secureauthentication.presentation.core.util.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.lastOrNull
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -23,6 +26,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val userUseCases: UserUseCases,
+    private val networkObserver: ConnectivityObserver
 ): ViewModel() {
 
     var uiState by mutableStateOf(UiState())
@@ -41,6 +45,20 @@ class ProfileViewModel @Inject constructor(
                     setLastName(lastName)
                     uiState = uiState.copy(emailAddress = user.emailAddress.value)
                 }
+            }
+        }
+
+        viewModelScope.launch {
+            networkObserver.observe().collectLatest {
+                uiState = uiState.copy(connected = it == ConnectivityObserver.Status.Available)
+            }
+        }
+    }
+
+    fun refresh() {
+        viewModelScope.launch {
+            userUseCases.getUserInfoUseCase().lastOrNull()?.let {
+                setUserInfo(it)
             }
         }
     }
@@ -98,7 +116,7 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             userUseCases.signOutUseCase().collectLatest {
                 uiState = uiState.copy(userSignOut = it)
-                if(it is RemoteResource.Success)
+                if(it is RemoteResource.Success || it is RemoteResource.Failure && it.error == ApiErrors.UNAUTHORIZED)
                     onSuccess()
             }
         }
@@ -111,6 +129,7 @@ class ProfileViewModel @Inject constructor(
         val lastNameText: String = "",
         val lastNameError: Boolean = false,
         val emailAddress: String = "",
+        val connected: Boolean = true,
         val userInfo: RemoteResource<User> = RemoteResource.Idle,
         val userUpdate: RemoteResource<Unit> = RemoteResource.Idle,
         val userSignOut: RemoteResource<Unit> = RemoteResource.Idle,

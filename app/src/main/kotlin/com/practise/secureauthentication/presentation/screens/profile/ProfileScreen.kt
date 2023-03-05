@@ -1,9 +1,12 @@
 package com.practise.secureauthentication.presentation.screens.profile
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -41,7 +44,12 @@ fun ProfileScreen(
     val uiState = viewModel.uiState
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
+
+    val inBackgroundLoading by remember(uiState.userUpdate, uiState.userDelete, uiState.userSignOut) {
+        with(uiState) {
+            mutableStateOf(userUpdate is RemoteResource.Loading || userDelete is RemoteResource.Loading || userSignOut is RemoteResource.Loading)
+        }
+    }
 
     fun navigateBackToLogin() {
         navigator.navigate(LoginScreenDestination) {
@@ -52,6 +60,16 @@ fun ProfileScreen(
     LaunchedEffect(key1 = Unit) {
         viewModel.informMessages.collectLatest {
             snackbarHostState.showSnackbar(it.asString(context))
+        }
+    }
+
+    LaunchedEffect(key1 = uiState.connected) {
+        if(!uiState.connected) {
+            snackbarHostState.showSnackbar(
+                message = context.getString(R.string.no_internet),
+                withDismissAction = true,
+                duration = SnackbarDuration.Indefinite
+            )
         }
     }
 
@@ -98,12 +116,17 @@ fun ProfileScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            ProfileTopBar(
-                menuExpanded = uiState.topBarMenuExpanded,
-                onSave = { viewModel.updateUserInfo() },
-                onDeleteAccountClicked = { navigator.navigate(DeleteAccountDialogDestination) },
-                onMenuExpandedChange = viewModel::setMenuExpandedState
-            )
+            Column {
+                ProfileTopBar(
+                    menuExpanded = uiState.topBarMenuExpanded,
+                    onSave = { viewModel.updateUserInfo() },
+                    onDeleteAccountClicked = { navigator.navigate(DeleteAccountDialogDestination) },
+                    onMenuExpandedChange = viewModel::setMenuExpandedState
+                )
+                AnimatedVisibility(visible = inBackgroundLoading) {
+                    LinearProgressIndicator(Modifier.fillMaxWidth())
+                }
+            }
         },
     ) {
         ScreenContent(
@@ -111,7 +134,9 @@ fun ProfileScreen(
             navigator = navigator,
             onFirstNameChanged = viewModel::setFirstName,
             onLastNameChanged = viewModel::setLastName,
+            refreshContent = viewModel::refresh,
             paddingValues = it,
+            navigateToLogin ={ navigateBackToLogin() }
         )
     }
 }
@@ -122,38 +147,29 @@ private fun ScreenContent(
     uiState: ProfileViewModel.UiState,
     paddingValues: PaddingValues = PaddingValues(0.dp),
     navigator: DestinationsNavigator,
+    navigateToLogin: () -> Unit,
+    refreshContent: () -> Unit,
     onFirstNameChanged: (String) -> Unit,
     onLastNameChanged: (String) -> Unit,
 ) {
-
-    val inBackgroundLoading by remember(uiState.userUpdate, uiState.userDelete, uiState.userSignOut) {
-        with(uiState) {
-            mutableStateOf(userUpdate is RemoteResource.Loading || userDelete is RemoteResource.Loading || userSignOut is RemoteResource.Loading)
-        }
-    }
 
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+
     ) {
         item {
-            Box(Modifier.fillMaxSize()) {
-                AnimatedVisibility(visible = inBackgroundLoading) {
-                    LinearProgressIndicator(
-                        Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.TopStart))
-                }
+            Box(modifier = Modifier.fillMaxSize()) {
                 uiState.userInfo.let {
                     when (it) {
                         is RemoteResource.Loading -> {
-                            Box(Modifier.fillMaxSize(), Alignment.Center) {
-                                CircularProgressIndicator()
-                            }
+                            CircularProgressIndicator(Modifier.align(Alignment.Center))
                         }
 
-                        is RemoteResource.Success -> {
+                        is RemoteResource.Success-> {
                             val user = it.data
                             CentralContent(
                                 modifier = Modifier.align(Alignment.Center),
@@ -170,19 +186,39 @@ private fun ScreenContent(
                         }
 
                         is RemoteResource.Failure -> {
-                            Text(text = it.error.name)
+                            it.data?.let { user ->
+                                // Load the user info from the cache if it exists
+                                CentralContent(
+                                    modifier = Modifier.align(Alignment.Center),
+                                    profilePhotoUrl = user.profilePhoto.url,
+                                    firstName = uiState.firstNameText,
+                                    firstNameError = uiState.firstNameError,
+                                    lastName = uiState.lastNameText,
+                                    lastNameError = uiState.lastNameError,
+                                    emailAddress = user.emailAddress.value,
+                                    onFirstNameChanged = onFirstNameChanged,
+                                    onLastNameChanged = onLastNameChanged,
+                                    onSignOutClicked = { navigator.navigate(SignOutDialogDestination) }
+                                )
+                            } ?:
+                            when (it.error) {
+                                ApiErrors.UNAUTHORIZED -> LaunchedEffect(Unit) { navigateToLogin() }
+                                else -> UnknownError(
+                                    message = stringResource(id = R.string.unknown_error),
+                                    onRetryClick = refreshContent
+                                )
+                            }
                         }
 
                         else -> {}
-                    }
-                }
 
+                    }
+
+                }
             }
 
         }
     }
-
-
 
 }
 
@@ -250,5 +286,34 @@ fun CentralContent(
             secondaryText = stringResource(id = R.string.sign_out),
             onClick = onSignOutClicked
         )
+    }
+}
+
+@Composable
+fun UnknownError(
+    message: String,
+    onRetryClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Image(
+            modifier = Modifier
+                .size(100.dp)
+                .padding(16.dp),
+            imageVector = Icons.Rounded.Warning,
+            contentDescription = stringResource(R.string.warning)
+        )
+        Text(text = message, style = MaterialTheme.typography.titleLarge)
+        Button(
+            modifier = Modifier
+                .width(TextFieldDefaults.MinWidth)
+                .padding(top = 16.dp),
+            onClick = onRetryClick
+        ) {
+            Text(text = stringResource(id = R.string.retry))
+        }
     }
 }

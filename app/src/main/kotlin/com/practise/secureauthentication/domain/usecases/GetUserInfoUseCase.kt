@@ -29,6 +29,6 @@ class GetUserInfoUseCase @Inject constructor(
 
     }.catch {
         val error = ApiErrors.identifyError(it)
-        emit(RemoteResource.Failure(error))
+        emit(RemoteResource.Failure(error, data = cache.getUserInfo().firstOrNull()))
     }.flowOn(Dispatchers.IO)
 }

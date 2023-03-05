@@ -20,9 +20,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -80,6 +78,7 @@ fun GoogleButton(
     }
 }
 @Composable
+@Suppress("unused")
 fun DividerWithCenteredText(
     modifier: Modifier = Modifier,
     dividerThickness: Dp = DividerDefaults.Thickness,
@@ -121,14 +120,12 @@ fun googleSignInLauncher(
 ): ActivityResultLauncher<IntentSenderRequest> {
 
     val tag = "GoogleSignInLauncher"
-    val clipboardManager = LocalClipboardManager.current //TODO: Remove this line after project completion
     val activityLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult()
     ) { activityResult ->
         if (activityResult.resultCode == Activity.RESULT_OK) {
             val credentials = oneTapClient.getSignInCredentialFromIntent(activityResult.data)
             val tokenId = credentials.googleIdToken ?: return@rememberLauncherForActivityResult
-            clipboardManager.setText(AnnotatedString(tokenId)) //TODO: Remove this line after project completion
             onTokenReceived(TokenId(tokenId))
         } else {
             Log.i(tag, "Login cancelled")

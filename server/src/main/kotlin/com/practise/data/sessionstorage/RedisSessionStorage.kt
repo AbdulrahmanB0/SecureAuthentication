@@ -14,7 +14,7 @@ class RedisSessionStorage(
 ) : SessionStorage {
 
     private fun extendExpire(id: String) =
-        client.expire(id, 1.minutes.inWholeSeconds)
+        client.expire(id, 30.minutes.inWholeSeconds)
 
     override suspend fun invalidate(id: String) {
         withContext(Dispatchers.IO) {

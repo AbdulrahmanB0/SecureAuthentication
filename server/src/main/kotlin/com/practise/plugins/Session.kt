@@ -23,7 +23,7 @@ fun Application.configureSessions() {
                 path = this@configureSessions.href(EndPoint.User())
                 secure = true
                 httpOnly = true
-                maxAge = 1.minutes
+                maxAge = 30.minutes
                 encoding = CookieEncoding.BASE64_ENCODING
             }
         }
