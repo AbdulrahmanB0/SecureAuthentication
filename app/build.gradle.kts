@@ -1,18 +1,21 @@
 @file:Suppress("UnstableApiUsage")
-val composeVersion:             String by project
-val hiltVersion:                String by project
-val ktorVersion:                String by project
-val coilVersion:                String by project
-val coroutinesVersion:          String by project
+
+val composeVersion: String by project
+val hiltVersion: String by project
+val ktorVersion: String by project
+val coilVersion: String by project
+val coroutinesVersion: String by project
 val composeDestinationsVersion: String by project
-val kotlinVersion:              String by project
-val logbackVersion:             String by project
+val kotlinVersion: String by project
+val logbackVersion: String by project
 
 plugins {
     kotlin("android")
     kotlin("kapt")
     kotlin("plugin.serialization")
 
+    id("org.jlleitschuh.gradle.ktlint-idea")
+    id("org.jlleitschuh.gradle.ktlint")
     id("com.android.application")
     id("dagger.hilt.android.plugin")
     id("com.google.devtools.ksp") version "1.8.10-1.0.9" // Depends on your kotlin version
@@ -52,7 +55,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.2"
+        kotlinCompilerExtensionVersion = "1.4.3"
     }
     packagingOptions {
         resources {
@@ -74,7 +77,6 @@ repositories {
     google()
 }
 
-
 dependencies {
 
     implementation("androidx.core:core-ktx:1.9.0")
@@ -82,7 +84,9 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.6.1")
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.compose.ui:ui-tooling-preview:$composeVersion")
-    implementation("androidx.compose.material3:material3:1.1.0-alpha06")
+    implementation("androidx.compose.material3:material3:1.1.0-alpha07")
+    implementation("com.google.accompanist:accompanist-placeholder-material:0.29.1-alpha")
+
     implementation(project(mapOf("path" to ":common")))
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
@@ -91,19 +95,17 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")
     debugImplementation("androidx.compose.ui:ui-test-manifest:$composeVersion")
 
-    //Compose Destinations
+    // Compose Destinations
     implementation("io.github.raamcosta.compose-destinations:animations-core:$composeDestinationsVersion")
     ksp("io.github.raamcosta.compose-destinations:ksp:$composeDestinationsVersion")
 
-    //dagger hilt
+    // dagger hilt
     implementation("com.google.dagger:hilt-android:$hiltVersion")
     kapt("com.google.dagger:hilt-compiler:$hiltVersion")
     kapt("androidx.hilt:hilt-compiler:1.0.0")
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 
-
-
-    //Ktor
+    // Ktor
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-resources:$ktorVersion")
@@ -113,14 +115,14 @@ dependencies {
 
     implementation("org.slf4j:slf4j-simple:2.0.6")
 
-    //Coil
+    // Coil
     implementation("io.coil-kt:coil:$coilVersion")
     implementation("io.coil-kt:coil-compose:$coilVersion")
 
-    //Datastore
+    // Datastore
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
-    //Play services
+    // Play services
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutinesVersion")
     implementation("com.google.android.gms:play-services-auth:20.4.1")
 }

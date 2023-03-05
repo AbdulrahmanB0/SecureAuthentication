@@ -14,7 +14,7 @@ import org.litote.kmongo.Id
 
 class MySqlUserDataSource(
     private val db: Database
-): UserDataSource {
+) : UserDataSource {
 
     init {
         transaction {
@@ -38,30 +38,29 @@ class MySqlUserDataSource(
             if (wasAcknowledged) {
                 wasAcknowledged = when (user) {
                     is RegularUser -> insertRegularUser(user)
-                    is GoogleUser ->  insertGoogleUser(user)
+                    is GoogleUser -> insertGoogleUser(user)
                 }
             }
-            if(!wasAcknowledged)
+            if (!wasAcknowledged) {
                 rollback()
+            }
             wasAcknowledged
         }.await()
-
-
     }
 
     override suspend fun getUserByUsername(username: String): User? {
         return suspendedTransactionAsync(Dispatchers.IO, db) {
             (RegularUser.Entity innerJoin User.Entity)
-                        .select { RegularUser.Entity.username eq username }.limit(1)
-                        .singleOrNull()
-                        ?.let(RegularUser.Entity::toModel)
+                .select { RegularUser.Entity.username eq username }.limit(1)
+                .singleOrNull()
+                ?.let(RegularUser.Entity::toModel)
         }.await()
     }
 
     override suspend fun getUserById(userId: Id<User>): User? {
         return suspendedTransactionAsync(Dispatchers.IO, db) {
             User.Entity.select { User.Entity.id eq userId.toString() }.singleOrNull()?.let {
-                when(it[User.Entity.type]) {
+                when (it[User.Entity.type]) {
                     RegularUser::class.simpleName -> RegularUser.Entity.toModel(it)
                     GoogleUser::class.simpleName -> GoogleUser.Entity.toModel(it)
                     else -> null
@@ -73,9 +72,9 @@ class MySqlUserDataSource(
     override suspend fun getUserBySubject(subject: String): User? {
         return suspendedTransactionAsync(Dispatchers.IO, db) {
             (GoogleUser.Entity innerJoin User.Entity)
-                        .select { GoogleUser.Entity.subjectId eq subject }.limit(1)
-                        .singleOrNull()
-                        ?.let(GoogleUser.Entity::toModel)
+                .select { GoogleUser.Entity.subjectId eq subject }.limit(1)
+                .singleOrNull()
+                ?.let(GoogleUser.Entity::toModel)
         }.await()
     }
 

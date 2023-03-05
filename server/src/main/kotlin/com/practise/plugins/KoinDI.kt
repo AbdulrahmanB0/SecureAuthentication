@@ -8,11 +8,11 @@ fun Application.configureKoin() {
     install(Koin) {
         modules(
             databaseModule +
-            hashingModule +
-            mailerModule +
-            authModule +
-            sessionStorageModule +
-            dataSourceBindingsModule
+                hashingModule +
+                mailerModule +
+                authModule +
+                sessionStorageModule +
+                dataSourceBindingsModule
         )
     }
 }

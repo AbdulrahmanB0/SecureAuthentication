@@ -10,15 +10,15 @@ import org.litote.kmongo.coroutine.CoroutineDatabase
  */
 class MongoSessionStorage(
     database: CoroutineDatabase
-): SessionStorage {
+) : SessionStorage {
     private val sessionsCollection = database.getCollection<UserSession>("sessions")
     override suspend fun invalidate(id: String) {
         sessionsCollection.deleteOneById(id)
     }
 
     override suspend fun read(id: String): String {
-        return sessionsCollection.findOneById(id)?.id ?:
-            throw NoSuchElementException("Could not find session ID: $id")
+        return sessionsCollection.findOneById(id)?.id
+            ?: throw NoSuchElementException("Could not find session ID: $id")
     }
 
     override suspend fun write(id: String, value: String) {

@@ -15,9 +15,9 @@ data class RegularUser(
     override val emailVerified: Boolean = false,
     override val name: String,
     override val emailAddress: EmailAddress
-): User() {
+) : User() {
 
-    object Entity: Table() {
+    object Entity : Table() {
         val id = reference("id", User.Entity.id, onDelete = ReferenceOption.CASCADE)
         val username = varchar("username", 50).uniqueIndex()
         val password = varchar("password", 128)
@@ -35,6 +35,5 @@ data class RegularUser(
                 emailAddress = EmailAddress(row[User.Entity.emailAddress])
             )
         }
-
     }
 }

@@ -13,4 +13,26 @@
     <string name="auth_success">You have been authenticated successfully!</string>
     <string name="no_internet">Connection failed. Check your internet connection.</string>
     <string name="something_wrong">Something went wrong, try again later.</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="delete_account_msg">Are you sure to delete your account?</string>
+    <string name="delete_account_title">Delete Account?</string>
+    <string name="failed_to_delete_account">Failed to delete your account, please try again later</string>
+    <string name="successful_delete_account">Your account is deleted successfully</string>
+    <string name="profile_photo">Profile photo</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="sign_out_title">Sign out?</string>
+    <string name="sign_out_msg">Are you sure to sign out from the app?</string>
+    <string name="sign_out_failed">Sign out failed, please try again later</string>
+    <string name="submit">Submit</string>
+    <string name="update_info_success">Your information is updated successfully</string>
+    <string name="update_info_failed">Failed to update your information</string>
+    <string name="invalid_name">Invalid first or last name</string>
+    <string name="nothing_to_update">Nothing to update</string>
+    <string name="unknown_error">Something went wrong, please try again later</string>
+    <string name="service_unavailable">Service is not available, please try again later</string>
+    <string name="session_timedout">Session timed out, please sign in again.</string>
+    <string name="sign_in">Sign in</string>
 </resources>

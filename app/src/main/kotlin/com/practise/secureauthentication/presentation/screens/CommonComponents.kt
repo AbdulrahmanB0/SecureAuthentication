@@ -2,9 +2,7 @@ package com.practise.secureauthentication.presentation.screens
 
 import android.content.Context
 import android.content.Intent
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import domain.model.TokenId
 
@@ -31,4 +29,13 @@ fun startActivityForSharingText(
 
     val shareIntent = Intent.createChooser(intentSender, "This is sharing title demo")
     context.startActivity(shareIntent)
+}
+
+@Composable
+fun ErrorSnackbar(it: SnackbarData) {
+    Snackbar(
+        snackbarData = it,
+        containerColor = MaterialTheme.colorScheme.errorContainer,
+        contentColor = MaterialTheme.colorScheme.onErrorContainer
+    )
 }

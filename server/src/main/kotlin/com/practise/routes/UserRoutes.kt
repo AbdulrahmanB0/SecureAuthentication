@@ -24,7 +24,6 @@ import com.practise.data.repository.MongoUserDataSource as Mongo
 
 /** This function aggregates all the defined user routes with proper authentication */
 fun Route.userRoutes() {
-
     val userDataSource: UserDataSource by inject(TypeQualifier(Mongo::class))
 
     authenticate(Constants.AUTH_SESSION) {
@@ -47,8 +46,7 @@ private fun Route.getUserInfoRoute(dataSource: UserDataSource) {
                 application.log.info(message)
                 call.respond(ApiResponse(data = user, message = message))
             }
-        }
-        else {
+        } else {
             MessagesResource.USER_INFO_RETRIEVAL_FAILED.message.let { message ->
                 application.log.error(message)
                 call.respond(HttpStatusCode.BadRequest, ApiResponse<Unit>(false, message = message))
@@ -67,18 +65,16 @@ private fun Route.updateUserInfoRoute(dataSource: UserDataSource) {
         val userUpdate = call.receive<UserUpdate>()
         val isSuccess = dataSource.updateUserInfo(ObjectId(userSession.id).toId(), userUpdate)
 
-        if(isSuccess) {
+        if (isSuccess) {
             application.log.info(MessagesResource.USER_INFO_UPDATE_SUCCESS.message)
             call.sessions.set(UserSession(userSession.id))
-            call.respond(ApiResponse<Unit>(message = MessagesResource.USER_INFO_UPDATE_SUCCESS.message))
-        }
-        else {
+            call.respond(status = HttpStatusCode.NoContent, ApiResponse<Unit>(message = MessagesResource.USER_INFO_UPDATE_SUCCESS.message))
+        } else {
             MessagesResource.USER_INFO_UPDATE_FAILED.message.let { message ->
                 application.log.error(message)
                 call.respond(HttpStatusCode.BadRequest, ApiResponse<Unit>(false, message = message))
             }
         }
-
     }
 }
 
@@ -86,17 +82,15 @@ private fun Route.updateUserInfoRoute(dataSource: UserDataSource) {
  * This route is used to permanently delete the user from the database when requested
  */
 private fun Route.deleteUserRoute(dataSource: UserDataSource) {
-
     delete<EndPoint.User> {
         val userSession = call.principal<UserSession>()!!
         val isSuccess = dataSource.deleteUser(ObjectId(userSession.id).toId())
 
-        if(isSuccess) {
+        if (isSuccess) {
             application.log.info(MessagesResource.USER_DELETE_SUCCESS.message)
             call.sessions.clear<UserSession>()
-            call.respond(ApiResponse<Unit>(message = MessagesResource.USER_DELETE_SUCCESS.message))
-        }
-        else {
+            call.respond(HttpStatusCode.NoContent, ApiResponse<Unit>(message = MessagesResource.USER_DELETE_SUCCESS.message))
+        } else {
             MessagesResource.USER_DELETE_FAILED.message.let { message ->
                 application.log.error(message)
                 call.respond(HttpStatusCode.BadRequest, ApiResponse<Unit>(false, message = message))
@@ -111,6 +105,6 @@ private fun Route.deleteUserRoute(dataSource: UserDataSource) {
 private fun Route.signOutUserRoute() {
     get<EndPoint.User.SignOut> {
         call.sessions.clear<UserSession>()
-        call.respond(ApiResponse<Unit>(message = MessagesResource.SIGNED_OUT.message))
+        call.respond(HttpStatusCode.NoContent, ApiResponse<Unit>(message = MessagesResource.SIGNED_OUT.message))
     }
 }

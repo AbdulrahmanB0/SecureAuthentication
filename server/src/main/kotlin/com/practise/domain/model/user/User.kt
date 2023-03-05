@@ -10,15 +10,15 @@ import java.time.Instant
 
 @Serializable
 sealed class User {
-    @Contextual @SerialName("_id") val id: Id<User> = newId()
+    @Contextual
+    @SerialName("_id")
+    val id: Id<User> = newId()
     abstract val name: String
     abstract val emailAddress: EmailAddress
     val createdAt: Long = Instant.now().epochSecond
     abstract val emailVerified: Boolean
 
-
-
-    object Entity: Table() {
+    object Entity : Table() {
         val id = varchar("id", 24)
         val name = varchar("name", 50)
         val emailAddress = varchar("emailAddress", 255)

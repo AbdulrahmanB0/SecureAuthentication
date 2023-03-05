@@ -12,7 +12,7 @@ import org.litote.kmongo.setValue
 
 class MongoUserDataSource(
     database: CoroutineDatabase
-): UserDataSource {
+) : UserDataSource {
 
     private val userCollection = database.getCollection<User>()
     override suspend fun addUser(user: User): Boolean {
@@ -32,8 +32,8 @@ class MongoUserDataSource(
     }
 
     override suspend fun getUserOrAdd(user: GoogleUser): User? {
-        return getUserBySubject(user.subjectId) ?:
-            user.takeIf { userCollection.insertOne(it).wasAcknowledged() }
+        return getUserBySubject(user.subjectId)
+            ?: user.takeIf { userCollection.insertOne(it).wasAcknowledged() }
     }
 
     override suspend fun deleteUser(userId: Id<User>): Boolean {

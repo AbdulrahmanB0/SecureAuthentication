@@ -9,11 +9,13 @@ import io.ktor.client.plugins.resources.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
+import java.util.Locale
 
 fun HttpClientConfig<*>.configureDefaultRequest() {
     defaultRequest {
         url("https://secureauth.abdulrahman.codes")
         contentType(ContentType.Application.Json)
+        headers.append(HttpHeaders.AcceptLanguage, Locale.getDefault().language)
     }
 }
 

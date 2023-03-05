@@ -19,7 +19,6 @@ val databaseModule get() = module {
         )
     }
 
-
     single {
         val connection = environment.config.property("database.mongo.connection").getString()
         val databaseName = environment.config.property("database.mongo.databaseName").getString()
@@ -29,13 +28,12 @@ val databaseModule get() = module {
             .getDatabase(databaseName)
     }
 
-
     single {
         RedisClient(
             environment.config.property("database.redis.host").getString(),
             environment.config.property("database.redis.port").getString().toInt(),
             environment.config.property("database.redis.username").getString(),
-            environment.config.property("database.redis.password").getString(),
+            environment.config.property("database.redis.password").getString()
         )
     }
 }

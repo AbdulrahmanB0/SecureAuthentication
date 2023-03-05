@@ -20,11 +20,11 @@ val mailerModule get() = module {
     single {
         HttpClient(CIO) {
             Auth {
-                 basic {
-                     credentials {
-                         BasicAuthCredentials("api", key)
-                     }
-                 }
+                basic {
+                    credentials {
+                        BasicAuthCredentials("api", key)
+                    }
+                }
             }
 
             defaultRequest {

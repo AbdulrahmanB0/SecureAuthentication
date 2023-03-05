@@ -24,7 +24,6 @@ import org.koin.core.qualifier.TypeQualifier
 import org.koin.ktor.ext.inject
 
 fun Route.authRoutes() {
-
     val dataSource: UserDataSource by inject(TypeQualifier(MongoUserDataSource::class))
     val oAuthRepository: OAuthRepository by inject()
     val hashingService: HashingService by inject(StringQualifier("PBKDF2"))
@@ -32,15 +31,12 @@ fun Route.authRoutes() {
     registerUserRoute(dataSource, hashingService)
     loginUserRoute(dataSource, hashingService)
     signInWithGoogleRoute(dataSource, oAuthRepository::verifyGoogleTokenId)
-
-
 }
 
 private fun Route.signInWithGoogleRoute(
     dataSource: UserDataSource,
     verifyGoogleTokenId: suspend (String) -> GoogleIdToken?
 ) {
-
     post<EndPoint.OAuth.Google> {
         val token = call.receive<TokenId>()
         val result = verifyGoogleTokenId(token.value)
@@ -51,15 +47,14 @@ private fun Route.signInWithGoogleRoute(
                 emailAddress = EmailAddress(payload.email),
                 photoUrl = ProfilePhotoUrl(payload["picture"].toString())
             ).let { dataSource.getUserOrAdd(it) }
-            if(user != null) {
-
+            if (user != null) {
                 call.sessions.set(UserSession(user.id.toString()))
                 application.log.info(MessagesResource.USER_SIGN_IN_SUCCESS.message)
                 val response = ApiResponse<Unit>(message = "Welcome! ${user.name}")
                 call.respond(response)
+            } else {
+                call.respond(HttpStatusCode.InternalServerError)
             }
-            else call.respond(HttpStatusCode.InternalServerError)
-
         } ?: kotlin.run {
             application.log.info(MessagesResource.TOKEN_VERIFICATION_FAILED.message)
             call.respond(HttpStatusCode.Unauthorized)
@@ -69,9 +64,9 @@ private fun Route.signInWithGoogleRoute(
 
 private fun Route.registerUserRoute(
     userDataSource: UserDataSource,
-    hashingService: HashingService,
+    hashingService: HashingService
 
-    ) {
+) {
     post<EndPoint.User.SignUp> {
         val user = call.receive<RegularUser>().let {
             val saltedHash = hashingService.generateSaltedHash(it.password)
@@ -79,7 +74,7 @@ private fun Route.registerUserRoute(
         }
 
         val success = userDataSource.addUser(user)
-        if(success) {
+        if (success) {
             call.sessions.set(UserSession(user.id.toString()))
             MessagesResource.USER_REGISTER_SUCCESS.message.let {
                 call.respond(
@@ -87,8 +82,7 @@ private fun Route.registerUserRoute(
                     ApiResponse<Unit>(message = it)
                 )
             }
-        }
-        else {
+        } else {
             MessagesResource.USER_REGISTER_FAIL.message.let {
                 application.log.info(it)
                 call.respond(
@@ -105,7 +99,7 @@ private fun Route.loginUserRoute(userDataSource: UserDataSource, hashingService:
         val credentials = call.receive<UserCredentials>()
         val user = userDataSource.getUserByUsername(credentials.username) as? RegularUser?
 
-        if(user != null) {
+        if (user != null) {
             val saltedHash = SaltedHash(user.password, user.salt)
             val passwordIsVerified = hashingService.verify(credentials.password, saltedHash)
             if (passwordIsVerified) {
@@ -113,14 +107,11 @@ private fun Route.loginUserRoute(userDataSource: UserDataSource, hashingService:
                 call.respond(
                     ApiResponse<Unit>(message = MessagesResource.USER_LOGIN_SUCCESS.message + "| Welcome Back, ${user.name}!")
                 )
-
             } else {
                 call.respond(HttpStatusCode.Unauthorized)
             }
-        }
-        else {
+        } else {
             call.respond(HttpStatusCode.Unauthorized)
         }
-
     }
 }

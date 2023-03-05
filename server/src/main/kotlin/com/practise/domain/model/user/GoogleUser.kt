@@ -14,9 +14,9 @@ data class GoogleUser(
     override val emailVerified: Boolean = true,
     override val name: String,
     override val emailAddress: EmailAddress
-): User() {
+) : User() {
 
-    object Entity: Table() {
+    object Entity : Table() {
         val id = reference("id", User.Entity.id, onDelete = ReferenceOption.CASCADE)
         val subjectId = varchar("subjectId", 64).uniqueIndex()
         val photoUrl = varchar("photoUrl", 255)

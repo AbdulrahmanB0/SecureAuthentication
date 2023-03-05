@@ -4,7 +4,7 @@ import android.content.Context
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
-import com.practise.secureauthentication.util.Constants
+import com.practise.secureauthentication.presentation.core.util.Constants
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

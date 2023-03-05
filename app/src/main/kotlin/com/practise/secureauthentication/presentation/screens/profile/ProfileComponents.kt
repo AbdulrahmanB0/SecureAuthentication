@@ -11,7 +11,7 @@ import com.practise.secureauthentication.R
 fun ProfileTopBar(
     menuExpanded: Boolean,
     onSave: () -> Unit,
-    onDeleteAllConfirmed: () -> Unit,
+    onDeleteAccountClicked: () -> Unit,
     onMenuExpandedChange: (Boolean) -> Unit
 ) {
     TopAppBar(
@@ -24,7 +24,7 @@ fun ProfileTopBar(
             SaveAction(onSave)
             DeleteAllAction(
                 menuExpanded = menuExpanded,
-                onDeleteAllConfirmed = onDeleteAllConfirmed,
+                onDeleteAllConfirmed = onDeleteAccountClicked,
                 onMenuExpandedChange = onMenuExpandedChange
             )
         }

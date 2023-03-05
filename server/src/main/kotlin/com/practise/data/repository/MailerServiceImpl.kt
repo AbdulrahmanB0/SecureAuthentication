@@ -1,7 +1,7 @@
 package com.practise.data.repository
 
-import com.practise.domain.model.user.EmailAddress
 import com.practise.domain.model.templating.FreeMarkerProcessorService
+import com.practise.domain.model.user.EmailAddress
 import com.practise.domain.repository.MailerService
 import io.ktor.client.*
 import io.ktor.client.request.*
@@ -10,7 +10,7 @@ import io.ktor.server.freemarker.*
 class MailerServiceImpl(
     private val client: HttpClient,
     private val freeMarkerProcessor: FreeMarkerProcessorService
-): MailerService {
+) : MailerService {
 
     override suspend fun sendEmail(to: EmailAddress, subject: String, text: String) {
         client.post {
@@ -28,5 +28,4 @@ class MailerServiceImpl(
             parameter("html", html)
         }
     }
-
 }

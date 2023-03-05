@@ -9,7 +9,6 @@ import io.ktor.server.resources.*
 import io.ktor.server.routing.*
 
 fun Application.configureRouting() {
-
     install(HttpsRedirect)
     install(Resources)
     routing {

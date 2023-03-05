@@ -1,5 +1,6 @@
 package com.practise.secureauthentication.data.repository
 
+import android.util.Log
 import com.practise.secureauthentication.data.network.EndPoint
 import com.practise.secureauthentication.domain.model.User
 import com.practise.secureauthentication.domain.model.UserUpdate
@@ -26,7 +27,7 @@ class KtorApiRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateUserInfo(userUpdate: UserUpdate): ApiResponse<Unit> {
-        return client.put(EndPoint.UserManipulation()) {
+        return client.patch(EndPoint.UserManipulation()) {
             setBody(userUpdate)
         }.body()
     }
@@ -36,7 +37,9 @@ class KtorApiRepositoryImpl @Inject constructor(
     }
 
     override suspend fun signOut(): ApiResponse<Unit> {
-        return client.get(EndPoint.UserManipulation.SignOut()).body()
+        return client.get(EndPoint.UserManipulation.SignOut()).body<ApiResponse<Unit>>().also {
+            Log.d("suspend testing", "signOut: Sign out success from server side")
+        }
     }
 
 }

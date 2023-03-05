@@ -21,11 +21,9 @@ val authModule get() = module {
         )
     }
 
-
     single<TokenService>(TypeQualifier(JwtTokenService::class)) {
-            JwtTokenService()
+        JwtTokenService()
     }
 
     single<OAuthRepository> { OAuthRepositoryImpl() }
-
 }

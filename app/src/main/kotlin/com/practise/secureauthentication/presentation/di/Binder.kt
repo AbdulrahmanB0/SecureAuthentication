@@ -1,9 +1,9 @@
 package com.practise.secureauthentication.presentation.di
 
 import com.practise.secureauthentication.data.repository.KtorApiRepositoryImpl
-import com.practise.secureauthentication.data.repository.SignInRepositoryImpl
+import com.practise.secureauthentication.data.repository.CacheRepositoryImpl
 import com.practise.secureauthentication.domain.repository.KtorApiRepository
-import com.practise.secureauthentication.domain.repository.SignInRepository
+import com.practise.secureauthentication.domain.repository.CacheRepository
 import com.practise.secureauthentication.presentation.core.connectivity.ConnectivityObserver
 import com.practise.secureauthentication.presentation.core.connectivity.NetworkConnectivityObserver
 import dagger.Binds
@@ -19,7 +19,7 @@ abstract class Binder {
 
     @Binds
     @Singleton
-    abstract fun bindSignInRepository(impl: SignInRepositoryImpl): SignInRepository
+    abstract fun bindSignInRepository(impl: CacheRepositoryImpl): CacheRepository
 
     @Binds
     @Singleton

@@ -17,5 +17,4 @@ val dataSourceBindingsModule = module {
     single<UserDataSource>(TypeQualifier(MySqlUserDataSource::class)) {
         MySqlUserDataSource(get())
     }
-
 }

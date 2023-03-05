@@ -4,7 +4,7 @@ import org.apache.commons.codec.binary.Hex
 import org.apache.commons.codec.digest.DigestUtils
 import java.security.SecureRandom
 
-class SHA256HashingService: HashingService {
+class SHA256HashingService : HashingService {
     override val saltLengthInBytes: Int = 32
     override fun generateSaltedHash(value: String): SaltedHash {
         val salt = SecureRandom().generateSeed(saltLengthInBytes).let { Hex.encodeHexString(it) }

@@ -1,11 +1,11 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-val ktorVersion:    String by project
-val kotlinVersion:  String by project
+val ktorVersion: String by project
+val kotlinVersion: String by project
 val logbackVersion: String by project
-val kMongoVersion:  String by project
-val koinVersion:    String by project
-val jedisVersion:   String by project
+val kMongoVersion: String by project
+val koinVersion: String by project
+val jedisVersion: String by project
 val exposedVersion: String by project
 
 plugins {
@@ -63,29 +63,28 @@ dependencies {
 
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
 
-    //Ktor for client
+    // Ktor for client
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-auth:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation-jvm:$ktorVersion")
 
-    //KMongo: MongoDB client
+    // KMongo: MongoDB client
     implementation("org.litote.kmongo:kmongo-async:$kMongoVersion")
     implementation("org.litote.kmongo:kmongo-id-serialization:$kMongoVersion")
     implementation("org.litote.kmongo:kmongo-coroutine-serialization:$kMongoVersion")
 
-    //Exposed ORM
+    // Exposed ORM
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
 
-    //Jedis: Java Redis client
+    // Jedis: Java Redis client
     implementation("redis.clients:jedis:$jedisVersion")
 
-
-    //Koin
+    // Koin
     implementation("io.insert-koin:koin-ktor:$koinVersion")
     implementation("io.insert-koin:koin-logger-slf4j:$koinVersion")
 
-    //Google Client Api
+    // Google Client Api
     implementation("com.google.api-client:google-api-client:2.1.2")
 }

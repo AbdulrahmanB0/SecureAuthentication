@@ -11,10 +11,10 @@ import redis.clients.jedis.JedisPooled as RedisClient
  */
 class RedisSessionStorage(
     private val client: RedisClient
-): SessionStorage {
+) : SessionStorage {
 
     private fun extendExpire(id: String) =
-        client.expire(id, 30.minutes.inWholeSeconds)
+        client.expire(id, 1.minutes.inWholeSeconds)
 
     override suspend fun invalidate(id: String) {
         withContext(Dispatchers.IO) {
@@ -24,7 +24,7 @@ class RedisSessionStorage(
 
     override suspend fun read(id: String): String {
         return withContext(Dispatchers.IO) {
-            client.get(id)?.also { extendExpire(id) } ?: "" //Empty string will cause the authentication to fail
+            client.get(id)?.also { extendExpire(id) } ?: "" // Empty string will cause the authentication to fail
         }
     }
 

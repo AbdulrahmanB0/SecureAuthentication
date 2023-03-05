@@ -8,32 +8,42 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.identity.SignInClient
-import com.practise.secureauthentication.domain.repository.KtorApiRepository
-import com.practise.secureauthentication.domain.repository.SignInRepository
+import com.practise.secureauthentication.R
+import com.practise.secureauthentication.data.RemoteResource
+import com.practise.secureauthentication.domain.repository.CacheRepository
 import com.practise.secureauthentication.domain.usecases.BeginSignWithGoogleUseCase
+import com.practise.secureauthentication.domain.usecases.VerifyUserTokenUseCase
 import com.practise.secureauthentication.presentation.core.connectivity.ConnectivityObserver
+import com.practise.secureauthentication.presentation.core.util.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import domain.model.TokenId
+import io.ktor.resources.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.lastOrNull
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.reflect.*
 
 @Suppress("unused")
 private const val TAG = "LoginViewModel"
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val signInRepository: SignInRepository,
+    private val signInRepository: CacheRepository,
     val oneTapClient: SignInClient,
-    private val ktorApi: KtorApiRepository,
+    private val verifyUserTokenUseCase: VerifyUserTokenUseCase,
     private val connectivityObserver: ConnectivityObserver,
     private val beginSignWithGoogleUseCase: BeginSignWithGoogleUseCase
 ): ViewModel() {
 
     var uiState by mutableStateOf(UiState())
         private set
+
+    private val _messages = Channel<UiText>()
+    val messages = _messages.receiveAsFlow()
 
     init {
         viewModelScope.launch {
@@ -48,53 +58,38 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun saveSignedInState(signedIn: Boolean) {
-        viewModelScope.launch {
-            signInRepository.saveSignedInState(signedIn)
-        }
-    }
+
 
     fun signInWithGoogle(
         launcher: ActivityResultLauncher<IntentSenderRequest>,
-        onCallerBlocked: () -> Unit,
-        onNoCredentials: () -> Unit,
     ) {
         viewModelScope.launch {
-            uiState = uiState.copy(loading = true)
+            setSignInResource(RemoteResource.Loading)
             beginSignWithGoogleUseCase(oneTapClient)
                 .onSuccess {
                     val intentSender = IntentSenderRequest.Builder(it.pendingIntent).build()
                     launcher.launch(intentSender)
                 }.onFailure {
-                    resetStates()
                     val isBlocked = detectBlockedCaller(it)
-                    if(isBlocked) {
-                        onCallerBlocked()
+                    val messageId = if(isBlocked) {
+                        R.string.caller_blocked
                     } else {
-                        onNoCredentials()
+                        R.string.account_not_found
                     }
+                    _messages.send(UiText.StringResource(messageId))
                 }
         }
     }
-
-    fun resetStates() {
-        uiState = UiState(connected = uiState.connected, signedIn = uiState.signedIn)
-    }
-
-    fun verifyTokenOnBackend(
-        tokenId: TokenId,
-        onSuccess: () -> Unit,
-        onFailure: (Throwable) -> Unit
-    ) {
-        viewModelScope.launch(Dispatchers.IO) {
-            kotlin.runCatching {
-                ktorApi.verifyToken(tokenId)
-            }.onSuccess {
-                onSuccess()
-            }.onFailure {
-                onFailure(it)
+    fun verifyTokenOnBackend(tokenId: TokenId) {
+        viewModelScope.launch {
+            verifyUserTokenUseCase(tokenId).collectLatest {
+                setSignInResource(it)
             }
         }
+    }
+
+    fun setSignInResource(it: RemoteResource<Unit>) {
+        uiState = uiState.copy(signInResource = it)
     }
 
     private suspend fun detectBlockedCaller(throwable: Throwable): Boolean {
@@ -107,7 +102,7 @@ class LoginViewModel @Inject constructor(
     data class UiState(
         val signedIn: Boolean = false,
         val connected: Boolean = false,
-        val loading: Boolean = false,
+        val signInResource: RemoteResource<Unit> = RemoteResource.Idle,
     )
 }
 

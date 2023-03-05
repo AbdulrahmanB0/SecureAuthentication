@@ -3,29 +3,38 @@ package com.practise.domain.model.api
 import io.ktor.resources.*
 import kotlinx.serialization.Serializable
 
-@Serializable @Resource("/")
+@Serializable
+@Resource("/")
 @Suppress("unused")
 class EndPoint {
 
-    @Serializable @Resource("oauth")
+    @Serializable
+    @Resource("oauth")
     class OAuth(val parent: EndPoint = EndPoint()) {
 
-        @Serializable @Resource("google")
+        @Serializable
+        @Resource("google")
         class Google(val parent: OAuth = OAuth())
     }
 
-    @Serializable @Resource("user")
+    @Serializable
+    @Resource("user")
     class User(val parent: EndPoint = EndPoint()) {
 
-        @Serializable @Resource("signup")
+        @Serializable
+        @Resource("signup")
         class SignUp(val parent: User = User())
 
-        @Serializable @Resource("signin")
+        @Serializable
+        @Resource("signin")
         class SignIn(val parent: User = User())
-        @Serializable @Resource("signout")
+
+        @Serializable
+        @Resource("signout")
         class SignOut(val parent: User = User())
     }
 
-    @Serializable @Resource("swagger")
+    @Serializable
+    @Resource("swagger")
     class Swagger(val parent: EndPoint = EndPoint())
 }

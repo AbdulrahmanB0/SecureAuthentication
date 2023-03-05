@@ -2,10 +2,10 @@ package com.practise.plugins
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import com.practise.core.Constants
 import com.practise.domain.model.MessagesResource
 import com.practise.domain.model.UserSession
 import com.practise.domain.model.security.token.TokenConfig
-import com.practise.core.Constants
 import io.ktor.http.*
 import io.ktor.http.auth.*
 import io.ktor.server.application.*
@@ -27,13 +27,11 @@ fun Application.configureAuthentication() {
             }
         }
 
-
         jwt(Constants.AUTH_JWT) {
-
             authHeader { call ->
                 call.request.queryParameters["t"]?.let {
-                    HttpAuthHeader.Single(AuthScheme.Bearer, it)               //Verify JWT from URL query parameters if exists,
-                } ?: call.request.parseAuthorizationHeader()    //Else, verify JWT from Authorization header
+                    HttpAuthHeader.Single(AuthScheme.Bearer, it) // Verify JWT from URL query parameters if exists,
+                } ?: call.request.parseAuthorizationHeader() // Else, verify JWT from Authorization header
             }
 
             verifier(
@@ -47,7 +45,6 @@ fun Application.configureAuthentication() {
             validate { jwtCredential ->
                 JWTPrincipal(jwtCredential.payload)
             }
-
         }
     }
 }

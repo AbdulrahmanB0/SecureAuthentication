@@ -7,5 +7,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class UserSession(
     @SerialName("userId")
-    val id: String,
-): Principal
+    val id: String
+) : Principal

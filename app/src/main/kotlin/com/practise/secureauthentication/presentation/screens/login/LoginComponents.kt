@@ -10,10 +10,12 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,9 +34,10 @@ import domain.model.TokenId
 @Composable
 fun GoogleButton(
     modifier: Modifier = Modifier,
-    loadingState: Boolean,
+    loadingState: Boolean = false,
     primaryText: String,
     secondaryText: String,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     onClick: () -> Unit
 ) {
 
@@ -55,6 +58,7 @@ fun GoogleButton(
         border = BorderStroke(1.dp, color = Color.LightGray),
         contentPadding = PaddingValues(8.dp),
         shape = RoundedCornerShape(4.dp),
+        interactionSource = interactionSource,
         colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.DarkGray)
     ) {
         Image(

@@ -8,6 +8,6 @@ import io.ktor.server.routing.*
 fun Route.swaggerRoute() {
     swaggerUI(
         path = application.href(EndPoint.Swagger()),
-        swaggerFile = "openapi/documentation.yaml",
+        swaggerFile = "openapi/documentation.yaml"
     )
 }

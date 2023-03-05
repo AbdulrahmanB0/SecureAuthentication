@@ -7,7 +7,6 @@ import io.ktor.server.request.*
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 
-
 fun Application.configureMonitoring() {
     install(CallLogging) {
         level = Level.DEBUG
@@ -17,22 +16,20 @@ fun Application.configureMonitoring() {
     install(MongoLogging) {
         level = ch.qos.logback.classic.Level.ERROR
     }
-
 }
 
-
-private  class MongoLoggerConfiguration {
+private class MongoLoggerConfiguration {
     var level: ch.qos.logback.classic.Level =
         ch.qos.logback.classic.Level.INFO
 }
-
 
 private val MongoLogging = createApplicationPlugin(
     name = "MongoLogging",
     createConfiguration = ::MongoLoggerConfiguration
 ) {
-    (LoggerFactory
-        .getLogger("org.mongodb.driver")
+    (
+        LoggerFactory
+            .getLogger("org.mongodb.driver")
             as Logger
-    ).level = pluginConfig.level
+        ).level = pluginConfig.level
 }

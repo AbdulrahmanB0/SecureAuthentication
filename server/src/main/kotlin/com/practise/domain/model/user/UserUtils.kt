@@ -2,7 +2,6 @@ package com.practise.domain.model.user
 
 import kotlinx.serialization.Serializable
 
-
 @Serializable @JvmInline
 value class EmailAddress(val value: String)
 
