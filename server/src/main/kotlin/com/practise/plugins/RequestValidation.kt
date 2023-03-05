@@ -1,10 +1,10 @@
 package com.practise.plugins
 
-import com.practise.core.isEmptyOrBlank
 import com.practise.domain.model.MessagesResource
 import com.practise.domain.model.RegexPatterns
 import com.practise.domain.model.user.RegularUser
 import com.practise.domain.model.user.UserUpdate
+import core.isEmptyOrBlank
 import domain.model.TokenId
 import io.ktor.server.application.*
 import io.ktor.server.plugins.requestvalidation.*
