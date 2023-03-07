@@ -1,6 +1,7 @@
 package com.practise.plugins
 
 import com.practise.domain.model.MessagesResource
+import com.practise.domain.model.NoSuchSessionException
 import domain.model.ApiResponse
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -16,6 +17,16 @@ fun Application.configureStatusPages() {
                 ApiResponse<Unit>(
                     success = false,
                     message = "Bad Request: ${cause.reasons.joinToString("\n")}"
+                )
+            )
+        }
+
+        exception<NoSuchSessionException> { call, _ ->
+            call.respond(
+                HttpStatusCode.Unauthorized,
+                ApiResponse<Unit>(
+                    success = false,
+                    message = "${HttpStatusCode.Unauthorized.value}: ${MessagesResource.UNAUTHORIZED.message}"
                 )
             )
         }

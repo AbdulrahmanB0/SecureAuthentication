@@ -15,6 +15,7 @@ fun Application.configureSessions() {
     val redisSessionStorage by inject<RedisSessionStorage>()
 
     install(Sessions) {
+
         cookie<UserSession>(
             name = Constants.USER_SESSION,
             storage = redisSessionStorage
@@ -27,12 +28,5 @@ fun Application.configureSessions() {
                 encoding = CookieEncoding.BASE64_ENCODING
             }
         }
-
-        /*
-        header<UserSession>(
-            name = Constants.USER_SESSION,
-            storage = redisSessionStorage,
-        )
-         */
     }
 }

@@ -1,9 +1,9 @@
 package com.practise.data.sessionstorage
 
+import com.practise.domain.model.NoSuchSessionException
 import io.ktor.server.sessions.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlin.time.Duration.Companion.minutes
 import redis.clients.jedis.JedisPooled as RedisClient
 
 /**
@@ -13,9 +13,6 @@ class RedisSessionStorage(
     private val client: RedisClient
 ) : SessionStorage {
 
-    private fun extendExpire(id: String) =
-        client.expire(id, 30.minutes.inWholeSeconds)
-
     override suspend fun invalidate(id: String) {
         withContext(Dispatchers.IO) {
             client.del(id)
@@ -24,14 +21,13 @@ class RedisSessionStorage(
 
     override suspend fun read(id: String): String {
         return withContext(Dispatchers.IO) {
-            client.get(id)?.also { extendExpire(id) } ?: "" // Empty string will cause the authentication to fail
+            client.get(id) ?: throw NoSuchSessionException("Session $id not found")
         }
     }
 
     override suspend fun write(id: String, value: String) {
         withContext(Dispatchers.IO) {
             client.set(id, value)
-            extendExpire(id)
         }
     }
 }
