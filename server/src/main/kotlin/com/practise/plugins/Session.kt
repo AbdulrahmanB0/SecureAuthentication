@@ -15,12 +15,12 @@ fun Application.configureSessions() {
     val redisSessionStorage by inject<RedisSessionStorage>()
 
     install(Sessions) {
-
         cookie<UserSession>(
             name = Constants.USER_SESSION,
             storage = redisSessionStorage
         ) {
             with(cookie) {
+                domain = this@configureSessions.environment.config.host
                 path = this@configureSessions.href(EndPoint.User())
                 secure = true
                 httpOnly = true
