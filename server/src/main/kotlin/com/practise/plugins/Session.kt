@@ -20,7 +20,7 @@ fun Application.configureSessions() {
             storage = redisSessionStorage
         ) {
             with(cookie) {
-                domain = this@configureSessions.environment.config.host
+                domain = System.getenv("domain")
                 path = this@configureSessions.href(EndPoint.User())
                 secure = true
                 httpOnly = true
