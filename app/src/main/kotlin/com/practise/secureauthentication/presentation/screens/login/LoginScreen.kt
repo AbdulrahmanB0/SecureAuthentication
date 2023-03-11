@@ -6,6 +6,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -17,7 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.practise.secureauthentication.R
-import com.practise.secureauthentication.data.RemoteResource
+import com.practise.secureauthentication.presentation.model.UiResource
 import com.practise.secureauthentication.presentation.screens.SimpleTopAppBar
 import com.practise.secureauthentication.presentation.screens.destinations.LoginScreenDestination
 import com.practise.secureauthentication.presentation.screens.destinations.ProfileScreenDestination
@@ -45,27 +46,22 @@ fun LoginScreen (
     }
 
     val activityLauncher = googleSignInLauncher(
-        onTokenReceived = { viewModel.verifyTokenOnBackend(it) },
-        onDialogDismissed = { viewModel.setSignInResource(RemoteResource.Idle) },
+        onTokenReceived = { viewModel.signInWithGoogle(it) },
+        onDialogDismissed = { viewModel.setSignInUiResource(UiResource.Idle) },
         oneTapClient = viewModel.oneTapClient
     )
-    LaunchedEffect(key1 = uiState.signInResource) {
-        if(uiState.signInResource is RemoteResource.Success)
+
+    LaunchedEffect(key1 = uiState.signInUiResource) {
+        if(uiState.signInUiResource is UiResource.Success)
             navigateToProfile()
-        else if (uiState.signInResource is RemoteResource.Failure)
+        else if (uiState.signInUiResource is UiResource.Failure)
             snackBarHostState.showSnackbar(context.getString(R.string.something_wrong))
 
     }
 
     LaunchedEffect(Unit) {
-        launch {
-            if(uiState.signedIn)
-                viewModel.signInWithGoogle(activityLauncher)
-        }
-        launch {
-            viewModel.messages.collectLatest {
-                snackBarHostState.showSnackbar(it.asString(context))
-            }
+        viewModel.messages.collectLatest {
+            snackBarHostState.showSnackbar(it.asString(context))
         }
     }
 
@@ -85,7 +81,8 @@ fun LoginScreen (
         ScreenContent(
             uiState = uiState,
             paddingValues = paddingValues,
-            onSignInClicked = { viewModel.signInWithGoogle(activityLauncher) }
+            snackBarHostState = snackBarHostState,
+            onSignInClicked = { viewModel.launchSignInWithGoogleIntent(activityLauncher) }
         )
     }
 
@@ -95,9 +92,11 @@ fun LoginScreen (
 private fun ScreenContent(
     uiState: LoginViewModel.UiState,
     paddingValues: PaddingValues,
+    snackBarHostState: SnackbarHostState,
     onSignInClicked: () -> Unit,
 ) {
-
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -128,10 +127,17 @@ private fun ScreenContent(
         GoogleButton(
             primaryText = stringResource(R.string.sign_in_with_google),
             secondaryText = stringResource(R.string.please_wait),
-            loadingState = uiState.signInResource is RemoteResource.Loading,
+            loadingState = uiState.signInUiResource is UiResource.Loading,
             onClick = {
                 if(uiState.connected)
                     onSignInClicked()
+                else
+                    scope.launch {
+                        snackBarHostState.showSnackbar(
+                            message = context.getString(R.string.no_internet),
+                            duration = SnackbarDuration.Long
+                        )
+                    }
             }
         )
     }

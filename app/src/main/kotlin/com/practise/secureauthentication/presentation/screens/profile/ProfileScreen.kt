@@ -19,8 +19,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.practise.secureauthentication.R
-import com.practise.secureauthentication.data.RemoteResource
-import com.practise.secureauthentication.data.network.ApiErrors
+import com.practise.secureauthentication.data.model.UserUnauthorizedException
+import com.practise.secureauthentication.presentation.model.UiResource
 import com.practise.secureauthentication.presentation.screens.destinations.DeleteAccountDialogDestination
 import com.practise.secureauthentication.presentation.screens.destinations.LoginScreenDestination
 import com.practise.secureauthentication.presentation.screens.destinations.ProfileScreenDestination
@@ -30,7 +30,9 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.result.NavResult
 import com.ramcosta.composedestinations.result.ResultRecipient
+import io.ktor.client.plugins.*
 import kotlinx.coroutines.flow.collectLatest
+import java.nio.channels.UnresolvedAddressException
 
 @Destination
 @Composable
@@ -47,7 +49,7 @@ fun ProfileScreen(
 
     val inBackgroundLoading by remember(uiState.userUpdate, uiState.userDelete, uiState.userSignOut) {
         with(uiState) {
-            mutableStateOf(userUpdate is RemoteResource.Loading || userDelete is RemoteResource.Loading || userSignOut is RemoteResource.Loading)
+            mutableStateOf(userUpdate is UiResource.Loading || userDelete is UiResource.Loading || userSignOut is UiResource.Loading)
         }
     }
 
@@ -60,16 +62,6 @@ fun ProfileScreen(
     LaunchedEffect(key1 = Unit) {
         viewModel.informMessages.collectLatest {
             snackbarHostState.showSnackbar(it.asString(context))
-        }
-    }
-
-    LaunchedEffect(key1 = uiState.connected) {
-        if(!uiState.connected) {
-            snackbarHostState.showSnackbar(
-                message = context.getString(R.string.no_internet),
-                withDismissAction = true,
-                duration = SnackbarDuration.Indefinite
-            )
         }
     }
 
@@ -86,13 +78,13 @@ fun ProfileScreen(
     }
 
     LaunchedEffect(key1 = uiState.userUpdate) {
-        if(uiState.userUpdate is RemoteResource.Success) {
+        if(uiState.userUpdate is UiResource.Success) {
             snackbarHostState.showSnackbar(context.getString(R.string.update_info_success))
         }
-        else if(uiState.userUpdate is RemoteResource.Failure) {
+        else if(uiState.userUpdate is UiResource.Failure) {
             with(snackbarHostState) {
-                when (uiState.userUpdate.error) {
-                    ApiErrors.UNAUTHORIZED -> {
+                when (uiState.userUpdate.throwable) {
+                    is UserUnauthorizedException -> {
                         val result = showSnackbar(
                             message = context.getString(R.string.session_timedout),
                             actionLabel = context.getString(R.string.sign_in),
@@ -104,8 +96,8 @@ fun ProfileScreen(
 
                     }
 
-                    ApiErrors.NO_INTERNET -> showSnackbar(context.getString(R.string.no_internet))
-                    ApiErrors.INTERNAL -> showSnackbar(context.getString(R.string.service_unavailable))
+                    is UnresolvedAddressException -> showSnackbar(context.getString(R.string.no_internet))
+                    is ServerResponseException -> showSnackbar(context.getString(R.string.service_unavailable))
                     else -> showSnackbar(context.getString(R.string.unknown_error))
                 }
             }
@@ -134,7 +126,7 @@ fun ProfileScreen(
             navigator = navigator,
             onFirstNameChanged = viewModel::setFirstName,
             onLastNameChanged = viewModel::setLastName,
-            refreshContent = viewModel::refresh,
+            refreshContent = viewModel::retryLoading,
             paddingValues = it,
             navigateToLogin ={ navigateBackToLogin() }
         )
@@ -163,58 +155,32 @@ private fun ScreenContent(
     ) {
         item {
             Box(modifier = Modifier.fillMaxSize()) {
-                uiState.userInfo.let {
-                    when (it) {
-                        is RemoteResource.Loading -> {
-                            CircularProgressIndicator(Modifier.align(Alignment.Center))
-                        }
+                uiState.userInfo.Fold(
+                    onLoading = { CircularProgressIndicator(Modifier.align(Alignment.Center)) },
+                    onSuccess = { user ->
 
-                        is RemoteResource.Success-> {
-                            val user = it.data
-                            CentralContent(
-                                modifier = Modifier.align(Alignment.Center),
-                                profilePhotoUrl = user.profilePhoto.url,
-                                firstName = uiState.firstNameText,
-                                firstNameError = uiState.firstNameError,
-                                lastName = uiState.lastNameText,
-                                lastNameError = uiState.lastNameError,
-                                emailAddress = user.emailAddress.value,
-                                onFirstNameChanged = onFirstNameChanged,
-                                onLastNameChanged = onLastNameChanged,
-                                onSignOutClicked = { navigator.navigate(SignOutDialogDestination) }
+                        CentralContent(
+                            modifier = Modifier.align(Alignment.Center),
+                            profilePhotoUrl = user.profilePhoto.url,
+                            firstName = uiState.firstNameText,
+                            firstNameError = uiState.firstNameError,
+                            lastName = uiState.lastNameText,
+                            lastNameError = uiState.lastNameError,
+                            emailAddress = user.emailAddress.value,
+                            onFirstNameChanged = onFirstNameChanged,
+                            onLastNameChanged = onLastNameChanged,
+                            onSignOutClicked = { navigator.navigate(SignOutDialogDestination) }
+                        ) },
+                    onFailure = {
+                        when(it) {
+                            is UserUnauthorizedException -> LaunchedEffect(Unit) { navigateToLogin() }
+                            else -> UnknownError(
+                                message = stringResource(id = R.string.unknown_error),
+                                onRetryClick = refreshContent
                             )
                         }
-
-                        is RemoteResource.Failure -> {
-                            it.data?.let { user ->
-                                // Load the user info from the cache if it exists
-                                CentralContent(
-                                    modifier = Modifier.align(Alignment.Center),
-                                    profilePhotoUrl = user.profilePhoto.url,
-                                    firstName = uiState.firstNameText,
-                                    firstNameError = uiState.firstNameError,
-                                    lastName = uiState.lastNameText,
-                                    lastNameError = uiState.lastNameError,
-                                    emailAddress = user.emailAddress.value,
-                                    onFirstNameChanged = onFirstNameChanged,
-                                    onLastNameChanged = onLastNameChanged,
-                                    onSignOutClicked = { navigator.navigate(SignOutDialogDestination) }
-                                )
-                            } ?:
-                            when (it.error) {
-                                ApiErrors.UNAUTHORIZED -> LaunchedEffect(Unit) { navigateToLogin() }
-                                else -> UnknownError(
-                                    message = stringResource(id = R.string.unknown_error),
-                                    onRetryClick = refreshContent
-                                )
-                            }
-                        }
-
-                        else -> {}
-
                     }
-
-                }
+                )
             }
 
         }

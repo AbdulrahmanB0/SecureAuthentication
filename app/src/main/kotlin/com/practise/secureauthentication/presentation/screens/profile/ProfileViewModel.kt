@@ -6,27 +6,25 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.practise.secureauthentication.R
-import com.practise.secureauthentication.data.RemoteResource
-import com.practise.secureauthentication.data.network.ApiErrors
-import com.practise.secureauthentication.domain.model.User
-import com.practise.secureauthentication.domain.model.UserUpdate
-import com.practise.secureauthentication.domain.usecases.UserUseCases
-import com.practise.secureauthentication.presentation.core.connectivity.ConnectivityObserver
-import com.practise.secureauthentication.presentation.core.util.UiText
+import com.practise.secureauthentication.data.model.UserUnauthorizedException
+import com.practise.secureauthentication.data.model.user.User
+import com.practise.secureauthentication.data.model.user.UserUpdate
+import com.practise.secureauthentication.domain.repository.NetworkStatusRepository
+import com.practise.secureauthentication.domain.repository.UserRepository
+import com.practise.secureauthentication.presentation.model.UiResource
+import com.practise.secureauthentication.presentation.model.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.lastOrNull
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val userUseCases: UserUseCases,
-    private val networkObserver: ConnectivityObserver
+    private val userRepo: UserRepository,
+    private val networkObserver: NetworkStatusRepository
 ): ViewModel() {
 
     var uiState by mutableStateOf(UiState())
@@ -37,7 +35,10 @@ class ProfileViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            userUseCases.getUserInfoUseCase().collectLatest {
+            userRepo.getUserInfo()
+                .onStart { uiState = uiState.copy(userInfo = UiResource.Loading) }
+                .map { result -> UiResource.from(result) }
+                .collectLatest {
                 setUserInfo(it)
                 it.getOrNull()?.let { user ->
                     val (firstName, lastName) = splitFullName(user.name)
@@ -50,15 +51,17 @@ class ProfileViewModel @Inject constructor(
 
         viewModelScope.launch {
             networkObserver.observe().collectLatest {
-                uiState = uiState.copy(connected = it == ConnectivityObserver.Status.Available)
+                uiState = uiState.copy(connected = it == NetworkStatusRepository.Status.Available)
             }
         }
     }
 
-    fun refresh() {
+    fun retryLoading() {
         viewModelScope.launch {
-            userUseCases.getUserInfoUseCase().lastOrNull()?.let {
-                setUserInfo(it)
+            userRepo.getUserInfo().onStart {
+                uiState = uiState.copy(userInfo = UiResource.Loading)
+            }.lastOrNull()?.let {
+                setUserInfo(UiResource from it)
             }
         }
     }
@@ -72,11 +75,10 @@ class ProfileViewModel @Inject constructor(
 
     fun setLastName(value: String) {
         uiState = uiState.copy(lastNameText = value, lastNameError = value.isEmpty() || value.isBlank())
-
     }
 
-    private fun setUserInfo(resource: RemoteResource<User>) {
-        uiState = uiState.copy(userInfo = resource)
+    private fun setUserInfo(uiResource: UiResource<User>) {
+        uiState = uiState.copy(userInfo = uiResource)
     }
 
     private suspend fun splitFullName(name: String): List<String> {
@@ -87,9 +89,9 @@ class ProfileViewModel @Inject constructor(
 
     fun deleteAccount(onSuccess: () -> Unit) {
         viewModelScope.launch {
-            userUseCases.deleteUserUseCase().collectLatest {
+            UiResource.from { userRepo.deleteUser() }.collectLatest {
                 uiState = uiState.copy(userDelete = it)
-                if(it is RemoteResource.Success)
+                if(it is UiResource.Success)
                     onSuccess()
             }
         }
@@ -100,11 +102,13 @@ class ProfileViewModel @Inject constructor(
             val user = uiState.userInfo.getOrNull() ?: return@launch
             if (uiState.firstNameError || uiState.lastNameError)
                 _informMessages.send(UiText.StringResource(R.string.invalid_name))
+            
             else if ("${uiState.firstNameText} ${uiState.lastNameText}" == user.name)
                 _informMessages.send(UiText.StringResource(R.string.nothing_to_update))
+            
             else {
                 val userUpdate = UserUpdate(uiState.firstNameText, uiState.lastNameText)
-                userUseCases.updateUserInfoUseCase(userUpdate).collectLatest {
+                UiResource.from { userRepo.updateUserInfo(userUpdate) }.collectLatest {
                     uiState = uiState.copy(userUpdate = it)
                 }
             }
@@ -114,9 +118,9 @@ class ProfileViewModel @Inject constructor(
 
     fun signOut(onSuccess: () -> Unit) {
         viewModelScope.launch {
-            userUseCases.signOutUseCase().collectLatest {
+            UiResource.from { userRepo.signOut() }.collectLatest {
                 uiState = uiState.copy(userSignOut = it)
-                if(it is RemoteResource.Success || it is RemoteResource.Failure && it.error == ApiErrors.UNAUTHORIZED)
+                if (it is UiResource.Success || it is UiResource.Failure && it.throwable is UserUnauthorizedException)
                     onSuccess()
             }
         }
@@ -130,9 +134,9 @@ class ProfileViewModel @Inject constructor(
         val lastNameError: Boolean = false,
         val emailAddress: String = "",
         val connected: Boolean = true,
-        val userInfo: RemoteResource<User> = RemoteResource.Idle,
-        val userUpdate: RemoteResource<Unit> = RemoteResource.Idle,
-        val userSignOut: RemoteResource<Unit> = RemoteResource.Idle,
-        val userDelete: RemoteResource<Unit> = RemoteResource.Idle
+        val userInfo: UiResource<User> = UiResource.Idle,
+        val userUpdate: UiResource<Unit> = UiResource.Idle,
+        val userSignOut: UiResource<Unit> = UiResource.Idle,
+        val userDelete: UiResource<Unit> = UiResource.Idle
     )
 }

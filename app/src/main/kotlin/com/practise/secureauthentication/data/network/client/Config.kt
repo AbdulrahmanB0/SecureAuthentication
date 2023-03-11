@@ -9,7 +9,7 @@ import io.ktor.client.plugins.resources.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
-import java.util.Locale
+import java.util.*
 
 fun HttpClientConfig<*>.configureDefaultRequest() {
     defaultRequest {
@@ -34,5 +34,9 @@ fun HttpClientConfig<*>.configureLogging() {
     }
 }
 
-fun HttpClientConfig<*>.configureCookies() = install(HttpCookies)
+fun HttpClientConfig<*>.configureCookies(
+    storage: CookiesStorage = AcceptAllCookiesStorage()
+) = install(HttpCookies) {
+    this.storage = storage
+}
 fun HttpClientConfig<*>.configureResources() = install(Resources)

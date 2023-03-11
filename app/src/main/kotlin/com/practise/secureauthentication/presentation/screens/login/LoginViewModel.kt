@@ -9,19 +9,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.practise.secureauthentication.R
-import com.practise.secureauthentication.data.RemoteResource
-import com.practise.secureauthentication.domain.repository.CacheRepository
+import com.practise.secureauthentication.domain.repository.AuthRepository
+import com.practise.secureauthentication.domain.repository.NetworkStatusRepository
 import com.practise.secureauthentication.domain.usecases.BeginSignWithGoogleUseCase
-import com.practise.secureauthentication.domain.usecases.VerifyUserTokenUseCase
-import com.practise.secureauthentication.presentation.core.connectivity.ConnectivityObserver
-import com.practise.secureauthentication.presentation.core.util.UiText
+import com.practise.secureauthentication.presentation.model.UiResource
+import com.practise.secureauthentication.presentation.model.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import domain.model.TokenId
-import io.ktor.resources.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.lastOrNull
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -32,10 +29,9 @@ import kotlin.reflect.*
 private const val TAG = "LoginViewModel"
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val signInRepository: CacheRepository,
     val oneTapClient: SignInClient,
-    private val verifyUserTokenUseCase: VerifyUserTokenUseCase,
-    private val connectivityObserver: ConnectivityObserver,
+    private val authRepo: AuthRepository,
+    private val connectivityObserver: NetworkStatusRepository,
     private val beginSignWithGoogleUseCase: BeginSignWithGoogleUseCase
 ): ViewModel() {
 
@@ -47,25 +43,20 @@ class LoginViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val isSignedIn = signInRepository.readSignedInState().lastOrNull() ?: false
-            uiState = uiState.copy(signedIn = isSignedIn)
-        }
-
-        viewModelScope.launch {
             connectivityObserver.observe().collectLatest {
-                uiState = uiState.copy(connected = it == ConnectivityObserver.Status.Available)
+                uiState = uiState.copy(connected = it == NetworkStatusRepository.Status.Available)
             }
         }
     }
 
 
 
-    fun signInWithGoogle(
+    fun launchSignInWithGoogleIntent(
         launcher: ActivityResultLauncher<IntentSenderRequest>,
     ) {
         viewModelScope.launch {
-            setSignInResource(RemoteResource.Loading)
-            beginSignWithGoogleUseCase(oneTapClient)
+            setSignInUiResource(UiResource.Loading)
+            beginSignWithGoogleUseCase()
                 .onSuccess {
                     val intentSender = IntentSenderRequest.Builder(it.pendingIntent).build()
                     launcher.launch(intentSender)
@@ -80,16 +71,16 @@ class LoginViewModel @Inject constructor(
                 }
         }
     }
-    fun verifyTokenOnBackend(tokenId: TokenId) {
+    fun signInWithGoogle(tokenId: TokenId) {
         viewModelScope.launch {
-            verifyUserTokenUseCase(tokenId).collectLatest {
-                setSignInResource(it)
+            UiResource.from { authRepo.signInWithGoogle(tokenId) }.collect {
+                setSignInUiResource(it)
             }
         }
     }
 
-    fun setSignInResource(it: RemoteResource<Unit>) {
-        uiState = uiState.copy(signInResource = it)
+    fun setSignInUiResource(it: UiResource<Unit>) {
+        uiState = uiState.copy(signInUiResource = it)
     }
 
     private suspend fun detectBlockedCaller(throwable: Throwable): Boolean {
@@ -100,9 +91,8 @@ class LoginViewModel @Inject constructor(
     }
 
     data class UiState(
-        val signedIn: Boolean = false,
         val connected: Boolean = false,
-        val signInResource: RemoteResource<Unit> = RemoteResource.Idle,
+        val signInUiResource: UiResource<Unit> = UiResource.Idle,
     )
 }
 

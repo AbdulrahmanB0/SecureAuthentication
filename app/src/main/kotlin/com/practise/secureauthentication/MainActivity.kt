@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import com.practise.secureauthentication.presentation.navigation.NavigationSystem
-import com.practise.secureauthentication.ui.theme.SecureAuthenticationTheme
+import com.practise.secureauthentication.presentation.theme.SecureAuthenticationTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

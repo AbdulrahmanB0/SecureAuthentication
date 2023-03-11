@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.practise.secureauthentication.R
-import com.practise.secureauthentication.ui.theme.LoadingBlue
+import com.practise.secureauthentication.presentation.theme.LoadingBlue
 import domain.model.TokenId
 
 @Composable
