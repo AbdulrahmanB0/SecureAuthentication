@@ -1,9 +1,8 @@
-package com.practise.secureauthentication.data.util
+package com.practise.secureauthentication.data.model.network
 
 import androidx.datastore.core.Serializer
-import com.practise.secureauthentication.data.model.network.Cookies
-import com.practise.secureauthentication.data.util.crypto.AndroidCryptoService
-import com.practise.secureauthentication.data.util.crypto.CryptoService
+import com.practise.secureauthentication.data.model.crypto.AndroidCryptoService
+import com.practise.secureauthentication.data.model.crypto.CryptoService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString

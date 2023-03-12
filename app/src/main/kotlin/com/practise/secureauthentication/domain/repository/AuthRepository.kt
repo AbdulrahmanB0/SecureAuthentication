@@ -5,4 +5,6 @@ import domain.model.TokenId
 interface AuthRepository {
 
     suspend fun signInWithGoogle(tokenId: TokenId): Result<Unit>
+
+    suspend fun isLoggedIn(): Result<Boolean>
 }

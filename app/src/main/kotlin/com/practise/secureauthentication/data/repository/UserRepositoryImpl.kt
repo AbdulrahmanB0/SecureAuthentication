@@ -3,7 +3,7 @@ package com.practise.secureauthentication.data.repository
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.practise.secureauthentication.data.datasource.user.UserLocalDataSource
 import com.practise.secureauthentication.data.datasource.user.UserRemoteDataSource
-import com.practise.secureauthentication.data.model.ResourceError
+import com.practise.secureauthentication.data.model.DataError
 import com.practise.secureauthentication.data.model.user.User
 import com.practise.secureauthentication.data.model.user.UserUpdate
 import com.practise.secureauthentication.data.util.suspendRunCatching
@@ -37,7 +37,7 @@ class UserRepositoryImpl @Inject constructor(
         getCachedUserInfo().getOrNull()?.let { user ->
             emit(Result.success(user))
         } ?: kotlin.run {
-            val error = ResourceError.identifyError(it)
+            val error = DataError.identifyError(it)
             emit(Result.failure(error))
         }
     }.flowOn(Dispatchers.IO)
@@ -51,21 +51,21 @@ class UserRepositoryImpl @Inject constructor(
         localDataSource.updateUserInfo {
             it?.copy(name = "${userUpdate.firstName} ${userUpdate.lastName}")
         }
-    }.recoverCatching { throw ResourceError.identifyError(it) }
+    }.recoverCatching { throw DataError.identifyError(it) }
 
 
     override suspend fun deleteUser() = suspendRunCatching<Unit> {
         remoteDataSource.deleteUser()
         localDataSource.updateUserInfo { null }
         oneTapClient.signOut().await()
-    }.recoverCatching { throw ResourceError.identifyError(it) }
+    }.recoverCatching { throw DataError.identifyError(it) }
 
 
     override suspend fun signOut() = suspendRunCatching<Unit> {
         remoteDataSource.signOutUser()
         localDataSource.updateUserInfo { null }
         oneTapClient.signOut().await()
-    }.recoverCatching { throw ResourceError.identifyError(it) }
+    }.recoverCatching { throw DataError.identifyError(it) }
 
 
 }

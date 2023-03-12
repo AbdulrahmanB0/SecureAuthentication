@@ -1,4 +1,4 @@
-package com.practise.secureauthentication.data.network
+package com.practise.secureauthentication.data.model.network
 
 import io.ktor.resources.*
 import kotlinx.serialization.Serializable

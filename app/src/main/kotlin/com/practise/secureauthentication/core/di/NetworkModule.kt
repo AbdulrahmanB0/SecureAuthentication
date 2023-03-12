@@ -1,9 +1,9 @@
 package com.practise.secureauthentication.core.di
 
 import androidx.datastore.core.DataStore
+import com.practise.secureauthentication.data.datasource.cookies.CookiesLocalDataSource
 import com.practise.secureauthentication.data.model.network.Cookies
-import com.practise.secureauthentication.data.network.PersistentCookieStorage
-import com.practise.secureauthentication.data.network.client.*
+import com.practise.secureauthentication.data.network.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,19 +25,20 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun providePersistentCookieStorage(datastore: DataStore<Cookies>): PersistentCookieStorage =
-        PersistentCookieStorage(datastore)
+    fun providePersistentCookieStorage(datastore: DataStore<Cookies>): CookiesLocalDataSource =
+        CookiesLocalDataSource(datastore)
 
     @Provides
     @Singleton
-    fun provideHttpClient(cookieStorage: PersistentCookieStorage): HttpClient {
+    fun provideHttpClient(cookieStorage: CookiesLocalDataSource): HttpClient {
         return HttpClient(CIO) {
             expectSuccess = true
             configureSerialization()
-            configureResources()
+            configureTypeSafeRequests()
             configureCookies(cookieStorage)
             configureLogging()
             configureDefaultRequest()
+            configureRetryPolicy()
         }
     }
 

@@ -2,7 +2,7 @@ package com.practise.secureauthentication.core.di
 
 import android.content.Context
 import android.net.ConnectivityManager
-import com.practise.secureauthentication.data.util.crypto.AndroidCryptoService
+import com.practise.secureauthentication.data.model.crypto.AndroidCryptoService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

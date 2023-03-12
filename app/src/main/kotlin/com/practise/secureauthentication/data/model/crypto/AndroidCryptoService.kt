@@ -1,4 +1,4 @@
-package com.practise.secureauthentication.data.util.crypto
+package com.practise.secureauthentication.data.model.crypto
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties

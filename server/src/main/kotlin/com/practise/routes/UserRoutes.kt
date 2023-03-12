@@ -83,16 +83,15 @@ private fun Route.updateUserInfoRoute(dataSource: UserDataSource) {
 private fun Route.deleteUserRoute(dataSource: UserDataSource) {
     delete<EndPoint.User> {
         val userSession = call.principal<UserSession>()!!
-        call.sessions.clear<UserSession>()
         val isSuccess = dataSource.deleteUser(ObjectId(userSession.id).toId())
 
         if (isSuccess) {
             application.log.info(MessagesResource.USER_DELETE_SUCCESS.message)
+            call.sessions.clear<UserSession>()
             call.respond(HttpStatusCode.OK, ApiResponse<Unit>(message = MessagesResource.USER_DELETE_SUCCESS.message))
         } else {
             MessagesResource.USER_DELETE_FAILED.message.let { message ->
                 application.log.error(message)
-                call.sessions.set(userSession)
                 call.respond(HttpStatusCode.BadRequest, ApiResponse<Unit>(false, message = message))
             }
         }

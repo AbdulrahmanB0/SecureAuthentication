@@ -1,7 +1,6 @@
-package com.practise.secureauthentication.data.util
+package com.practise.secureauthentication.data.model.user
 
 import androidx.datastore.core.Serializer
-import com.practise.secureauthentication.data.model.user.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString

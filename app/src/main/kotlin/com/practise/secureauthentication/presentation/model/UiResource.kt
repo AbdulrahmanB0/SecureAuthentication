@@ -11,7 +11,7 @@ sealed class UiResource<out T> {
     data class Failure<T>(val throwable: Throwable): UiResource<T>()
 
     @Composable
-    fun Fold(
+    inline fun Fold(
         onIdle: @Composable () -> Unit = { },
         onLoading: @Composable () -> Unit,
         onSuccess: @Composable (data: T) -> Unit,

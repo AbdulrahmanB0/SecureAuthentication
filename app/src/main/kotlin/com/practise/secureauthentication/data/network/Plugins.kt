@@ -1,4 +1,4 @@
-package com.practise.secureauthentication.data.network.client
+package com.practise.secureauthentication.data.network
 
 import io.ktor.client.*
 import io.ktor.client.plugins.*
@@ -39,4 +39,10 @@ fun HttpClientConfig<*>.configureCookies(
 ) = install(HttpCookies) {
     this.storage = storage
 }
-fun HttpClientConfig<*>.configureResources() = install(Resources)
+
+fun HttpClientConfig<*>.configureTypeSafeRequests() = install(Resources)
+
+fun HttpClientConfig<*>.configureRetryPolicy() = install(HttpRequestRetry) {
+    retryOnServerErrors(maxRetries = 5)
+    exponentialDelay()
+}

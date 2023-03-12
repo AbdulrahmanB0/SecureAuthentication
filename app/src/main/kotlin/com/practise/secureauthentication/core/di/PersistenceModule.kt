@@ -7,8 +7,8 @@ import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.dataStoreFile
 import com.practise.secureauthentication.data.model.network.Cookies
 import com.practise.secureauthentication.data.model.user.User
-import com.practise.secureauthentication.data.util.CookieSerializer
-import com.practise.secureauthentication.data.util.UserSerializer
+import com.practise.secureauthentication.data.model.network.CookieSerializer
+import com.practise.secureauthentication.data.model.user.UserSerializer
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

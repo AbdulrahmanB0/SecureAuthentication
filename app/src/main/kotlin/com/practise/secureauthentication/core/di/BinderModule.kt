@@ -3,8 +3,8 @@ package com.practise.secureauthentication.core.di
 import com.practise.secureauthentication.data.repository.AuthRepositoryImpl
 import com.practise.secureauthentication.data.repository.NetworkStatusRepositoryImpl
 import com.practise.secureauthentication.data.repository.UserRepositoryImpl
-import com.practise.secureauthentication.data.util.crypto.AndroidCryptoService
-import com.practise.secureauthentication.data.util.crypto.CryptoService
+import com.practise.secureauthentication.data.model.crypto.AndroidCryptoService
+import com.practise.secureauthentication.data.model.crypto.CryptoService
 import com.practise.secureauthentication.domain.repository.AuthRepository
 import com.practise.secureauthentication.domain.repository.NetworkStatusRepository
 import com.practise.secureauthentication.domain.repository.UserRepository

@@ -1,7 +1,7 @@
 package com.practise.secureauthentication.data.datasource.user
 
 import com.practise.secureauthentication.data.model.user.UserUpdate
-import com.practise.secureauthentication.data.network.EndPoint
+import com.practise.secureauthentication.data.model.network.EndPoint
 import io.ktor.client.*
 import io.ktor.client.plugins.resources.*
 import io.ktor.client.request.*
